@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Финансовый Дашборд</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f7f6; display: flex; flex-direction: column; align-items: center; padding: 50px; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #ffe600; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        button:hover { background: #e6cf00; }
+        #dashboard { display: none; max-width: 800px; width: 100%; }
+        .chart-container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <!-- Экран входа -->
+    <div id="loginCard" class="card">
+        <h2>Мои финансы</h2>
+        <input type="password" id="passwordInput" placeholder="Введите пароль">
+        <button onclick="loadData()">Войти</button>
+        <p id="errorMsg" style="color: red; display: none;"></p>
+    </div>
+
+    <!-- Дашборд -->
+    <div id="dashboard">
+        <h2 style="text-align: center;">📊 Распределение бюджета</h2>
+        <div class="chart-container">
+            <canvas id="myChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // ТВОЙ СЕКРЕТНЫЙ URL ИЗ GOOGLE APPS SCRIPT
+        const API_URL = "https://script.google.com/macros/s/AKfycbzuhA9zufi1HOSvSF3q6l599aNIIWg6FV3k-hGV-teqFkQFQWh4uPzFIMZNBB3OrYguyA/exec"; 
+
+        async function loadData() {
+            const pass = document.getElementById('passwordInput').value;
+            const btn = document.querySelector('button');
+            const errorMsg = document.getElementById('errorMsg');
+            
+            btn.innerText = "Загрузка...";
+            errorMsg.style.display = 'none';
+
+            try {
+                // Отправляем пароль на сервер Google
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ password: pass }),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' } // text/plain нужен для обхода строгих CORS политик Google
+                });
+                
+                const result = await response.json();
+
+                if (result.status === "error") {
+                    errorMsg.innerText = result.message;
+                    errorMsg.style.display = 'block';
+                    btn.innerText = "Войти";
+                } else {
+                    // Пароль верный, сервер отдал данные
+                    document.getElementById('loginCard').style.display = 'none';
+                    document.getElementById('dashboard').style.display = 'block';
+                    renderChart(result.headers, result.data);
+                }
+            } catch (e) {
+                errorMsg.innerText = "Ошибка сети";
+                errorMsg.style.display = 'block';
+                btn.innerText = "Войти";
+            }
+        }
+
+        function renderChart(headers, rows) {
+            // Ищем нужные колонки (названия могут отличаться, поправь индексы при необходимости)
+            const groupIdx = headers.indexOf('Моя группа');
+            const sumIdx = headers.indexOf('Сумма');
+
+            let totals = {};
+
+            // Суммируем траты по категориям
+            rows.forEach(row => {
+                let group = row[groupIdx];
+                // Преобразуем сумму в число (убираем пробелы, меняем запятую на точку)
+                let sum = parseFloat(String(row[sumIdx]).replace(/\s/g, '').replace(',', '.'));
+                
+                if (group && !isNaN(sum) && sum > 0) { // Игнорируем пополнения (если они с минусом) или 0
+                    totals[group] = (totals[group] || 0) + sum;
+                }
+            });
+
+            // Рисуем график
+            const ctx = document.getElementById('myChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(totals),
+                    datasets: [{
+                        data: Object.values(totals),
+                        backgroundColor: ['#4CAF50', '#FF9800', '#F44336', '#2196F3', '#9C27B0']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
