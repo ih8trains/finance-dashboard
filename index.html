@@ -72,12 +72,66 @@
             }
         }
 
-        function renderChart(headers, rows) {
-            // Ищем нужные колонки (названия могут отличаться, поправь индексы при необходимости)
-            const groupIdx = headers.indexOf('Моя группа');
-            const sumIdx = headers.indexOf('Сумма');
+function renderChart(headers, rows) {
+            console.log("Заголовки из таблицы:", headers); // Для отладки (F12 -> Console)
+
+            // Ищем столбцы, игнорируя лишние пробелы и регистр
+            const groupIdx = headers.findIndex(h => String(h).trim().toLowerCase() === 'моя группа');
+            const sumIdx = headers.findIndex(h => String(h).trim().toLowerCase() === 'сумма');
+
+            if (groupIdx === -1 || sumIdx === -1) {
+                alert(`Ошибка: Не найдены столбцы "Моя группа" или "Сумма". Вот что скрипт видит в таблице: ${headers.join(', ')}`);
+                return;
+            }
 
             let totals = {};
+
+            rows.forEach(row => {
+                let group = String(row[groupIdx] || "").trim();
+                let rawSum = row[sumIdx];
+                
+                // Преобразуем сумму: убираем пробелы, меняем запятую на точку и берем по модулю (Math.abs)
+                let sum = parseFloat(String(rawSum).replace(/\s/g, '').replace(',', '.'));
+                sum = Math.abs(sum); 
+
+                // Берем только размеченные траты (пропускаем "Не размечено" и пустоты)
+                if (group && group !== "Не размечено" && !isNaN(sum) && sum > 0) {
+                    totals[group] = (totals[group] || 0) + sum;
+                }
+            });
+
+            const labels = Object.keys(totals);
+            const dataValues = Object.values(totals);
+
+            if (labels.length === 0) {
+                alert("Нет размеченных данных! Заполни лист 'Справочник' в таблице, чтобы категории банка получили твою группу.");
+                return;
+            }
+
+            const ctx = document.getElementById('myChart').getContext('2d');
+            
+            // Удаляем старый график, если он был (полезно при повторном входе)
+            if (window.myDoughnutChart) {
+                window.myDoughnutChart.destroy();
+            }
+
+            window.myDoughnutChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dataValues,
+                        backgroundColor: ['#4CAF50', '#FF9800', '#F44336', '#2196F3', '#9C27B0', '#00BCD4', '#8BC34A', '#E91E63']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
 
             // Суммируем траты по категориям
             rows.forEach(row => {
