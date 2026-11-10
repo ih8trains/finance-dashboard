@@ -34,8 +34,8 @@
     </div>
 
     <script>
-        // ТВОЙ СЕКРЕТНЫЙ URL ИЗ GOOGLE APPS SCRIPT
-        const API_URL = "https://script.google.com/macros/s/AKfycbzuhA9zufi1HOSvSF3q6l599aNIIWg6FV3k-hGV-teqFkQFQWh4uPzFIMZNBB3OrYguyA/exec"; 
+        // ВСТАВЬ СЮДА СВОЙ URL ОТ GOOGLE APPS SCRIPT!
+        const API_URL = "URL_ВЕБ_ПРИЛОЖЕНИЯ_ИЗ_ШАГА_1"; 
 
         async function loadData() {
             const pass = document.getElementById('passwordInput').value;
@@ -50,7 +50,7 @@
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     body: JSON.stringify({ password: pass }),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' } // text/plain нужен для обхода строгих CORS политик Google
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                 });
                 
                 const result = await response.json();
@@ -72,7 +72,7 @@
             }
         }
 
-function renderChart(headers, rows) {
+        function renderChart(headers, rows) {
             console.log("Заголовки из таблицы:", headers); // Для отладки (F12 -> Console)
 
             // Ищем столбцы, игнорируя лишние пробелы и регистр
@@ -86,6 +86,7 @@ function renderChart(headers, rows) {
 
             let totals = {};
 
+            // Суммируем траты по категориям
             rows.forEach(row => {
                 let group = String(row[groupIdx] || "").trim();
                 let rawSum = row[sumIdx];
@@ -110,7 +111,7 @@ function renderChart(headers, rows) {
 
             const ctx = document.getElementById('myChart').getContext('2d');
             
-            // Удаляем старый график, если он был (полезно при повторном входе)
+            // Удаляем старый график, если он был
             if (window.myDoughnutChart) {
                 window.myDoughnutChart.destroy();
             }
@@ -122,37 +123,6 @@ function renderChart(headers, rows) {
                     datasets: [{
                         data: dataValues,
                         backgroundColor: ['#4CAF50', '#FF9800', '#F44336', '#2196F3', '#9C27B0', '#00BCD4', '#8BC34A', '#E91E63']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { position: 'bottom' }
-                    }
-                }
-            });
-        }
-
-            // Суммируем траты по категориям
-            rows.forEach(row => {
-                let group = row[groupIdx];
-                // Преобразуем сумму в число (убираем пробелы, меняем запятую на точку)
-                let sum = parseFloat(String(row[sumIdx]).replace(/\s/g, '').replace(',', '.'));
-                
-                if (group && !isNaN(sum) && sum > 0) { // Игнорируем пополнения (если они с минусом) или 0
-                    totals[group] = (totals[group] || 0) + sum;
-                }
-            });
-
-            // Рисуем график
-            const ctx = document.getElementById('myChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(totals),
-                    datasets: [{
-                        data: Object.values(totals),
-                        backgroundColor: ['#4CAF50', '#FF9800', '#F44336', '#2196F3', '#9C27B0']
                     }]
                 },
                 options: {
