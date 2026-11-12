@@ -66,8 +66,9 @@ async function loadDashboard(pass){
  const totalStart=performance.now(),timings={};
  password=pass;$('loginButton').disabled=true;$('loginButton').textContent='Загрузка…';
  const dataPromise=api({});
- const metaPromise=dataPromise.then(data=>Array.isArray(data.labels)?data:api({action:'get_meta'}).catch(e=>{console.warn('Не удалось получить метаданные',e);return {labels:[],settings:{}}}));
- const [data,meta]=await Promise.all([dataPromise,metaPromise]);
+ const metaPromise=api({action:'get_meta'}).catch(e=>{console.warn('Не удалось получить метаданные',e);return {labels:[],settings:{}}});
+ const [data,metaResponse]=await Promise.all([dataPromise,metaPromise]);
+ const meta=Array.isArray(data.labels)?data:metaResponse;
  timings.api=Math.round(performance.now()-totalStart);
  if(!Array.isArray(data.headers)||!Array.isArray(data.data))throw new Error('Сервер не вернул таблицу операций');
  rawHeaders=data.headers;rawRows=data.data;
