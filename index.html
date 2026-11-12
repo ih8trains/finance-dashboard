@@ -65,11 +65,10 @@ async function api(payload){let res=await fetch(API_URL,{method:'POST',headers:{
 async function loadDashboard(pass){
  const totalStart=performance.now(),timings={};
  password=pass;$('loginButton').disabled=true;$('loginButton').textContent='Загрузка…';
- const dataPromise=api({});
- const metaPromise=api({action:'get_meta'}).catch(e=>{console.warn('Не удалось получить метаданные',e);return {labels:[],settings:{}}});
- const [data,metaResponse]=await Promise.all([dataPromise,metaPromise]);
- const meta=Array.isArray(data.labels)?data:metaResponse;
- timings.api=Math.round(performance.now()-totalStart);
+ const apiStart=performance.now();
+ const data=await api({});
+ const meta=data;
+ timings.api=Math.round(performance.now()-apiStart);
  if(!Array.isArray(data.headers)||!Array.isArray(data.data))throw new Error('Сервер не вернул таблицу операций');
  rawHeaders=data.headers;rawRows=data.data;
  const normalizeStart=performance.now();let n=normalize(rawHeaders,rawRows);ops=n.items;lastMeta=n;
