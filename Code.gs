@@ -1064,6 +1064,10 @@ function handleArchiveAction_(request) {
     return archiveUpload_(request);
   }
 
+  if (action === "archive_backup") {
+    return archiveBackupMonth_(request);
+  }
+
   if (action === "archive_mark_verified") {
     return archiveMarkVerified_(request);
   }
@@ -1286,6 +1290,82 @@ function archiveGetMonth_(monthValue) {
   };
 }
 
+function archiveBackupMonth_(request) {
+  const month = String(request.month || "");
+  const backupId = String(request.backupId || "");
+
+  if (!/^\\d{4}-\\d{2}$/.test(month)) {
+    throw new Error("Некорректный месяц резервной копии.");
+  }
+
+  if (!/^[a-zA-Z0-9_-]{8,80}$/.test(backupId)) {
+    throw new Error("Некорректный идентификатор миграции.");
+  }
+
+  const sourcePath = ARCHIVE_CONFIG_.ARCHIVE_FOLDER +
+    "/" + month + ".json.enc";
+
+  const source = githubGetFile_(sourcePath);
+
+  if (!source) {
+    throw new Error("Исходный архив не найден: " + month);
+  }
+
+  let envelope;
+  try {
+    envelope = JSON.parse(source.content);
+  } catch (error) {
+    throw new Error("Исходный архив " + month + " содержит некорректный JSON.");
+  }
+
+  if (
+    envelope.month !== month ||
+    envelope.algorithm !== "AES-GCM" ||
+    envelope.kdf !== "PBKDF2-SHA-256" ||
+    !envelope.salt ||
+    !envelope.iv ||
+    !envelope.ciphertext ||
+    !envelope.sha256 ||
+    !Number.isFinite(Number(envelope.count))
+  ) {
+    throw new Error("Исходный архив " + month + " не прошёл проверку структуры.");
+  }
+
+  const backupPath = ARCHIVE_CONFIG_.ARCHIVE_FOLDER +
+    "/backups/" + backupId + "/" + month + ".json.enc";
+
+  const existingBackup = githubGetFile_(backupPath);
+
+  if (existingBackup) {
+    if (existingBackup.content !== source.content) {
+      throw new Error(
+        "Резервная копия " + month +
+        " с таким ID уже существует, но её содержимое отличается."
+      );
+    }
+  } else {
+    githubPutFile_(
+      backupPath,
+      source.content,
+      "Backup finance archive before password migration " + month,
+      null
+    );
+  }
+
+  return {
+    status: "success",
+    month: month,
+    backupId: backupId,
+    backupPath: backupPath,
+    count: Number(envelope.count),
+    sha256: String(envelope.sha256),
+    backupUrl:
+      "https://raw.githubusercontent.com/" +
+      ARCHIVE_CONFIG_.REPOSITORY + "/" +
+      ARCHIVE_CONFIG_.BRANCH + "/" + backupPath
+  };
+}
+
 function archiveUpload_(request) {
   const month = String(request.month || "");
   const envelope = request.envelope;
@@ -1309,6 +1389,24 @@ function archiveUpload_(request) {
 
   if (Number(envelope.count) <= 0) {
     throw new Error("Пустой архив загружать нельзя.");
+  }
+
+  const backupId = String(request.backupId || "");
+
+  if (backupId) {
+    if (!/^[a-zA-Z0-9_-]{8,80}$/.test(backupId)) {
+      throw new Error("Некорректный идентификатор резервной копии.");
+    }
+
+    const backupPath = ARCHIVE_CONFIG_.ARCHIVE_FOLDER +
+      "/backups/" + backupId + "/" + month + ".json.enc";
+
+    if (!githubGetFile_(backupPath)) {
+      throw new Error(
+        "Нельзя заменить архив " + month +
+        ": предварительная резервная копия не найдена."
+      );
+    }
   }
 
   const path = ARCHIVE_CONFIG_.ARCHIVE_FOLDER +
@@ -1348,6 +1446,9 @@ function archiveUpload_(request) {
     salt: String(envelope.salt),
     iv: String(envelope.iv),
     status: "uploaded",
+    backupPath: backupId
+      ? ARCHIVE_CONFIG_.ARCHIVE_FOLDER + "/backups/" + backupId + "/" + month + ".json.enc"
+      : "",
     uploadedAt: new Date().toISOString()
   };
 
