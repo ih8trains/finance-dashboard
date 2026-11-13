@@ -177,7 +177,9 @@ async function runArchivePreparation() {
       action: "archive_list_candidates"
     });
 
-    const candidates = candidateResult.candidates || [];
+    const candidates = Array.isArray(candidateResult.candidates)
+      ? candidateResult.candidates
+      : [];
 
     if (!candidates.length) {
       archiveStatus("Новых месяцев для архивирования нет. Уже проверенные архивы повторно не создаются.");
@@ -190,10 +192,19 @@ async function runArchivePreparation() {
     let completed = 0;
 
     for (const candidate of candidates) {
+      if (!candidate || !candidate.month) {
+        throw new Error("Сервер вернул некорректную запись месяца: отсутствует month.");
+      }
+
+      const listedCount = Number(candidate.count ?? candidate.rowsCount);
+      const hasListedCount = Number.isFinite(listedCount) && listedCount >= 0;
+
       archiveStatus(
         "Архивирую " + candidate.month +
-        " · " + candidate.count.toLocaleString("ru-RU") +
-        " операций. Готово: " + completed + " из " + candidates.length + "."
+        (hasListedCount
+          ? " · " + listedCount.toLocaleString("ru-RU") + " операций."
+          : " · проверяю количество операций.") +
+        " Готово: " + completed + " из " + candidates.length + "."
       );
 
       const source = await api({
@@ -206,11 +217,25 @@ async function runArchivePreparation() {
         !payload ||
         payload.month !== candidate.month ||
         !Array.isArray(payload.headers) ||
-        !Array.isArray(payload.rows) ||
-        payload.rows.length !== candidate.count
+        !Array.isArray(payload.rows)
       ) {
-        throw new Error("Исходные данные " + candidate.month + " не прошли проверку количества строк.");
+        throw new Error("Сервер не вернул корректные исходные данные месяца " + candidate.month + ".");
       }
+
+      const actualCount = payload.rows.length;
+      if (
+        (payload.count !== undefined && Number(payload.count) !== actualCount) ||
+        (hasListedCount && listedCount !== actualCount)
+      ) {
+        throw new Error(
+          "Количество операций " + candidate.month + " не совпало. " +
+          "В списке: " + (hasListedCount ? listedCount : "не указано") +
+          ", фактически: " + actualCount + "."
+        );
+      }
+
+      // Дальше используем фактическое число строк из полученного payload.
+      candidate.count = actualCount;
 
       const plaintext = encoder.encode(JSON.stringify(payload));
       const sha256 = await archiveSha256(plaintext);
@@ -299,7 +324,7 @@ async function runArchivePreparation() {
       line.className = "metric-row";
       line.textContent =
         candidate.month + " · " +
-        restored.rows.length.toLocaleString("ru-RU") +
+        Number(restored.rows.length).toLocaleString("ru-RU") +
         " операций · загружено, скачано и расшифровано";
       $("archiveMonths").appendChild(line);
     }
