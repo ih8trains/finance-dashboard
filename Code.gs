@@ -1158,6 +1158,13 @@ function archiveListCandidates_() {
   const cutoff = new Date(now.getTime());
   cutoff.setDate(cutoff.getDate() - ARCHIVE_CONFIG_.ROLLING_DAYS);
 
+  const manifest = archiveReadManifest_();
+  const verifiedMonths = new Set(
+    manifest.archives
+      .filter(item => item.status === "verified")
+      .map(item => item.month)
+  );
+
   const candidates = [];
 
   sheets.forEach(sheet => {
@@ -1171,6 +1178,7 @@ function archiveListCandidates_() {
     }
 
     const monthInfo = archiveParseSheetMonth_(sheetName);
+    if (verifiedMonths.has(monthInfo.key)) return;
     if (!monthInfo) return;
 
     const monthEnd = new Date(
