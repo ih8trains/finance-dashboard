@@ -1178,8 +1178,8 @@ function archiveListCandidates_() {
     }
 
     const monthInfo = archiveParseSheetMonth_(sheetName);
-    if (verifiedMonths.has(monthInfo.key)) return;
     if (!monthInfo) return;
+    if (verifiedMonths.has(monthInfo.key)) return;
 
     const monthEnd = new Date(
       monthInfo.year,
