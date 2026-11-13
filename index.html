@@ -29,7 +29,17 @@
 <section class="page" id="page-analytics"><div class="grid cols-even"><article class="card"><div class="card-head"><div><h2>Сравнение периодов</h2><div class="card-desc">Текущий выбранный период и предыдущий такой же</div></div></div><div id="periodCompare"></div></article><article class="card"><div class="card-head"><div><h2>Финансовая структура</h2><div class="card-desc">Доходы, расходы, транзит и остаток</div></div></div><div class="chart"><canvas id="structureChart"></canvas></div></article></div><div class="grid cols-even"><article class="card"><div class="card-head"><div><h2>Расходы по времени</h2><div class="card-desc">Часы операций, если банковские данные содержат время</div></div></div><div class="chart"><canvas id="hourChart"></canvas></div></article><article class="card"><div class="card-head"><div><h2>География операций</h2><div class="card-desc">Только если регион торговой точки заполнен</div></div></div><div id="geoList"></div></article></div></section>
 <section class="page" id="page-tags"><div class="grid cols-even"><article class="card"><div class="card-head"><div><h2>Категории и теги</h2><div class="card-desc">Категория отвечает «что куплено», тег — «какой контекст»</div></div></div><div id="tagStats"></div></article><article class="card"><div class="card-head"><div><h2>Быстрая разметка</h2><div class="card-desc">Открой операцию в журнале и назначь несколько тегов</div></div></div><div class="notice">Примеры тегов: личное, для_Михаила, работа, возместить, подписка, обязательное, импульсивная_покупка, подарок, здоровье, дом, оптимизировать.</div><button class="btn" data-goto="operations">Перейти к операциям</button></article></div></section>
 <section class="page" id="page-rules"><div class="grid cols-2"><article class="card"><div class="card-head"><div><h2>Новое правило</h2><div class="card-desc">Автоматически предлагать разметку для похожих операций</div></div></div><div class="form-grid"><div class="form-item"><label>Искать в поле</label><select class="field" id="ruleField"><option value="merchant">Магазин / бренд</option><option value="description">Описание</option><option value="source">Источник дохода</option><option value="category">Категория банка</option></select></div><div class="form-item"><label>Содержит текст</label><input class="field" id="ruleMatch" placeholder="Например, Михаил"></div><div class="form-item"><label>Назначить категорию</label><input class="field" id="ruleCategory" placeholder="Дополнительный заработок"></div><div class="form-item"><label>Контекст</label><select class="field" id="ruleScope"><option value="">Не менять</option><option value="personal">Личное</option><option value="transit">За другого</option><option value="work">Рабочее</option><option value="shared">Совместное</option></select></div><div class="form-item full"><label>Теги через запятую</label><input class="field" id="ruleTags" placeholder="доп_заработок, работа"></div></div><div style="margin-top:14px"><button class="primary" id="saveRule">Создать правило</button></div></article><article class="card"><div class="card-head"><div><h2>Сохранённые правила</h2><div class="card-desc">Правила применяются к данным при загрузке, не меняя исходные банковские поля</div></div></div><div id="rulesList"></div></article></div></section>
-<section class="page" id="page-settings"><div class="grid cols-even"><article class="card"><div class="card-head"><div><h2>Модель учёта</h2><div class="card-desc">Что включается в личный финансовый результат</div></div></div><div class="metric-row"><span>Внутренние переводы <span class="muted">isInner=true</span></span><span class="pill green">Исключены</span></div><div class="metric-row"><span>Переводы от людей</span><span class="pill gold">Доход, если подтверждён</span></div><div class="metric-row"><span>Покупки для других</span><span class="pill blue">Транзит</span></div><div class="metric-row"><span>Возвраты</span><span class="pill">Отдельная корректировка</span></div><div class="metric-row"><span>Кэшбэк и бонусы</span><span class="pill">Не смешиваются</span></div></article><article class="card"><div class="card-head"><div><h2>Данные и безопасность</h2><div class="card-desc">Текущий источник и сохранность разметки</div></div></div><div id="dataDiagnostics"></div><div class="footer-note">Пользовательские теги, категории, бюджеты и правила хранятся в отдельных служебных листах Google Sheets. Незавершённая разметка дополнительно сохраняется в локальном кэше браузера и отправляется повторно после следующего входа. Банковские листы не изменяются.</div><div style="margin-top:14px"><button class="btn danger" id="clearLocal">Очистить локальный кэш</button></div></article></div></section>
+<section class="page" id="page-settings"><div class="grid cols-even"><article class="card"><div class="card-head"><div><h2>Модель учёта</h2><div class="card-desc">Что включается в личный финансовый результат</div></div></div><div class="metric-row"><span>Внутренние переводы <span class="muted">isInner=true</span></span><span class="pill green">Исключены</span></div><div class="metric-row"><span>Переводы от людей</span><span class="pill gold">Доход, если подтверждён</span></div><div class="metric-row"><span>Покупки для других</span><span class="pill blue">Транзит</span></div><div class="metric-row"><span>Возвраты</span><span class="pill">Отдельная корректировка</span></div><div class="metric-row"><span>Кэшбэк и бонусы</span><span class="pill">Не смешиваются</span></div></article><article class="card"><div class="card-head"><div><h2>Данные и безопасность</h2><div class="card-desc">Текущий источник и сохранность разметки</div></div></div><div id="dataDiagnostics"></div><div class="footer-note">Пользовательские теги, категории, бюджеты и правила хранятся в отдельных служебных листах Google Sheets. Незавершённая разметка дополнительно сохраняется в локальном кэше браузера и отправляется повторно после следующего входа. Банковские листы не изменяются.</div><div style="margin-top:14px"><button class="btn danger" id="clearLocal">Очистить локальный кэш</button></div></article><article class="card" style="grid-column:1/-1">
+<div class="card-head"><div><h2>Архивирование операций</h2><div class="card-desc">Закрытые месяцы будут зашифрованы и сохранены в приватно-необратимом виде для посторонних: в GitHub попадут только зашифрованные файлы. Google Sheets на этом этапе не очищается.</div></div></div>
+<div class="form-grid">
+<div class="form-item"><label>Отдельный пароль архива</label><input class="field" id="archivePassword" type="password" autocomplete="new-password" placeholder="Придумай отдельный пароль"></div>
+<div class="form-item"><label>Проверка и загрузка</label><button class="primary" id="archiveStartButton" type="button">Создать и проверить архивы</button></div>
+</div>
+<div class="footer-note">Используй длинный уникальный пароль и сохрани его в надёжном месте. Он не отправляется в Apps Script и не сохраняется в браузере. Без него восстановить архивы будет невозможно.</div>
+<div id="archiveStatus" class="notice" style="margin-top:14px">Пока архивы не создавались. Сначала проверим доступные закрытые месяцы.</div>
+<div id="archiveMonths" style="margin-top:10px"></div>
+</article>
+</div></section>
 <div class="footer-note">Финансовые показатели основаны на данных Т‑Банка и пользовательской разметке. Неподтверждённые классификации помечаются как требующие проверки.</div></main></div>
 <div class="modal-backdrop hidden" id="editBackdrop"><div class="modal"><div class="modal-head"><h2>Разметка операции</h2><button class="btn small" id="closeEdit">Закрыть</button></div><div id="editOperationInfo" class="notice"></div><div class="form-grid"><div class="form-item"><label>Пользовательская категория</label><input class="field" id="editCategory" placeholder="Например, Дополнительный заработок"></div><div class="form-item"><label>Тип / роль операции</label><select class="field" id="editRole"><option value="">Авто по банку</option><option value="income">Доход</option><option value="expense">Расход</option><option value="transfer">Перевод</option><option value="refund">Возврат</option><option value="fee">Комиссия</option></select></div><div class="form-item"><label>Контекст расходов</label><select class="field" id="editScope"><option value="personal">Личное</option><option value="transit">За другого / транзит</option><option value="work">Рабочее</option><option value="shared">Совместное</option><option value="unknown">Не определено</option></select></div><div class="form-item"><label>Связанный человек</label><input class="field" id="editPerson" placeholder="Например, Михаил"></div><div class="form-item"><label>Проект</label><input class="field" id="editProject" placeholder="Название проекта"></div><div class="form-item"><label>Ожидается возмещение</label><select class="field" id="editReimbursable"><option value="false">Нет</option><option value="true">Да</option></select></div><div class="form-item"><label>Уже возмещено, ₽</label><input class="field" id="editReimbursed" type="number" min="0"></div><div class="form-item full"><label>Теги через запятую</label><input class="field" id="editTags" placeholder="личное, дом, оптимизировать"></div><div class="form-item full"><label>Комментарий</label><textarea class="field" id="editComment" placeholder="Зачем была операция, что важно помнить…"></textarea></div></div><div class="modal-foot"><button class="btn" id="cancelEdit">Отмена</button><button class="primary" id="saveEdit">Сохранить разметку</button></div></div></div>
 <script>
@@ -84,6 +94,230 @@ async function loadDashboard(pass){
  timings.total=Math.round(performance.now()-totalStart);console.info('[Finance] Время загрузки, мс',timings);
  if(Object.keys(pendingLabels).length)flushPendingLabels().catch(console.warn)
 }
+
+const ARCHIVE_PBKDF2_ITERATIONS = 600000;
+
+function archiveBytesToBase64(bytes) {
+  let binary = "";
+  for (let offset = 0; offset < bytes.length; offset += 0x8000) {
+    binary += String.fromCharCode(
+      ...bytes.subarray(offset, Math.min(offset + 0x8000, bytes.length))
+    );
+  }
+  return btoa(binary);
+}
+
+function archiveBase64ToBytes(value) {
+  const binary = atob(value);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
+async function archiveSha256(bytes) {
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest))
+    .map(value => value.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+async function archiveDeriveKey(passphrase, salt, usages) {
+  const material = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(passphrase),
+    "PBKDF2",
+    false,
+    ["deriveKey"]
+  );
+
+  return crypto.subtle.deriveKey(
+    {
+      name: "PBKDF2",
+      salt: salt,
+      iterations: ARCHIVE_PBKDF2_ITERATIONS,
+      hash: "SHA-256"
+    },
+    material,
+    {
+      name: "AES-GCM",
+      length: 256
+    },
+    false,
+    usages
+  );
+}
+
+function archiveStatus(message) {
+  $("archiveStatus").textContent = message;
+}
+
+async function runArchivePreparation() {
+  const passphrase = $("archivePassword").value;
+  const button = $("archiveStartButton");
+
+  if (!passphrase || passphrase.length < 12) {
+    alert("Задай отдельный пароль архива длиной не менее 12 символов.");
+    return;
+  }
+
+  if (!window.crypto || !crypto.subtle) {
+    alert("Браузер не поддерживает Web Crypto. Открой дашборд в актуальном Chrome или Safari.");
+    return;
+  }
+
+  button.disabled = true;
+  $("archiveMonths").innerHTML = "";
+
+  try {
+    archiveStatus("Проверяю, какие месяцы уже закрыты и готовы к архивированию…");
+
+    const candidateResult = await api({
+      action: "archive_list_candidates"
+    });
+
+    const candidates = candidateResult.candidates || [];
+
+    if (!candidates.length) {
+      archiveStatus("Новых месяцев для архивирования нет. Уже проверенные архивы повторно не создаются.");
+      return;
+    }
+
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
+
+    let completed = 0;
+
+    for (const candidate of candidates) {
+      archiveStatus(
+        "Архивирую " + candidate.month +
+        " · " + candidate.count.toLocaleString("ru-RU") +
+        " операций. Готово: " + completed + " из " + candidates.length + "."
+      );
+
+      const source = await api({
+        action: "archive_get_month",
+        month: candidate.month
+      });
+
+      const payload = source.payload;
+      if (
+        !payload ||
+        payload.month !== candidate.month ||
+        !Array.isArray(payload.headers) ||
+        !Array.isArray(payload.rows) ||
+        payload.rows.length !== candidate.count
+      ) {
+        throw new Error("Исходные данные " + candidate.month + " не прошли проверку количества строк.");
+      }
+
+      const plaintext = encoder.encode(JSON.stringify(payload));
+      const sha256 = await archiveSha256(plaintext);
+      const salt = crypto.getRandomValues(new Uint8Array(16));
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const key = await archiveDeriveKey(passphrase, salt, ["encrypt"]);
+
+      const encrypted = await crypto.subtle.encrypt(
+        { name: "AES-GCM", iv: iv },
+        key,
+        plaintext
+      );
+
+      const envelope = {
+        algorithm: "AES-GCM",
+        kdf: "PBKDF2-SHA-256",
+        iterations: ARCHIVE_PBKDF2_ITERATIONS,
+        salt: archiveBytesToBase64(salt),
+        iv: archiveBytesToBase64(iv),
+        sha256: sha256,
+        count: payload.rows.length,
+        ciphertext: archiveBytesToBase64(new Uint8Array(encrypted))
+      };
+
+      const uploaded = await api({
+        action: "archive_upload",
+        month: candidate.month,
+        envelope: envelope
+      });
+
+      const downloadUrl = uploaded.archiveUrl +
+        "?verify=" + encodeURIComponent(String(Date.now()));
+
+      const response = await fetch(downloadUrl, { cache: "no-store" });
+      if (!response.ok) {
+        throw new Error("Не удалось скачать архив " + candidate.month + " после загрузки. HTTP " + response.status);
+      }
+
+      const downloadedEnvelope = await response.json();
+
+      if (
+        downloadedEnvelope.month !== candidate.month ||
+        downloadedEnvelope.sha256 !== sha256 ||
+        Number(downloadedEnvelope.count) !== payload.rows.length
+      ) {
+        throw new Error("Метаданные скачанного архива " + candidate.month + " не совпали с исходными.");
+      }
+
+      const verifySalt = archiveBase64ToBytes(downloadedEnvelope.salt);
+      const verifyIv = archiveBase64ToBytes(downloadedEnvelope.iv);
+      const verifyKey = await archiveDeriveKey(passphrase, verifySalt, ["decrypt"]);
+
+      const decrypted = await crypto.subtle.decrypt(
+        { name: "AES-GCM", iv: verifyIv },
+        verifyKey,
+        archiveBase64ToBytes(downloadedEnvelope.ciphertext)
+      );
+
+      const decryptedBytes = new Uint8Array(decrypted);
+      const verifiedHash = await archiveSha256(decryptedBytes);
+
+      if (verifiedHash !== downloadedEnvelope.sha256) {
+        throw new Error("SHA-256 не совпал после расшифровки " + candidate.month + ".");
+      }
+
+      const restored = JSON.parse(decoder.decode(decryptedBytes));
+
+      if (
+        restored.month !== candidate.month ||
+        !Array.isArray(restored.rows) ||
+        restored.rows.length !== Number(downloadedEnvelope.count)
+      ) {
+        throw new Error("Количество или месяц после расшифровки " + candidate.month + " не совпали.");
+      }
+
+      await api({
+        action: "archive_mark_verified",
+        month: candidate.month,
+        sha256: verifiedHash,
+        count: restored.rows.length
+      });
+
+      completed++;
+
+      const line = document.createElement("div");
+      line.className = "metric-row";
+      line.textContent =
+        candidate.month + " · " +
+        restored.rows.length.toLocaleString("ru-RU") +
+        " операций · загружено, скачано и расшифровано";
+      $("archiveMonths").appendChild(line);
+    }
+
+    archiveStatus(
+      "Готово: " + completed + " архивов прошли проверку SHA-256 и количества операций. " +
+      "Исходные строки в Google Sheets не удалялись."
+    );
+
+  } catch (error) {
+    archiveStatus("Остановлено: " + (error.message || String(error)) +
+      ". Уже проверенные месяцы сохранены; исходные данные в Google Sheets не удалялись.");
+  } finally {
+    $("archivePassword").value = "";
+    button.disabled = false;
+  }
+}
+
 async function saveMeta(payload){try{await api(payload);return true}catch(e){alert('Не удалось сохранить в Google Sheets: '+e.message);return false}}async function saveLabel(l){const clean={...l,tags:Array.isArray(l.tags)?l.tags:[]};labels[l.operation_id]=clean;pendingLabels[l.operation_id]={...clean,_cached_at:Date.now()};persistPendingLabels();renderAll();try{await api({action:'save_label',label:clean});delete pendingLabels[l.operation_id];persistPendingLabels();$('dataStatus').textContent='Разметка сохранена в Google Sheets';return true}catch(e){$('dataStatus').textContent='Разметка сохранена локально · ожидает отправки';alert('Изменение сохранено в кэше браузера, но пока не отправлено в Google Sheets. Оно не потеряется при обновлении страницы. Проверь подключение и нажми «Повторить отправку» в статусе изменений.');return true}}async function flushPendingLabels(){const ids=Object.keys(pendingLabels);if(!ids.length)return true;for(let offset=0;offset<ids.length;offset+=100){const chunk=ids.slice(offset,offset+100),batch=chunk.map(id=>{const x={...pendingLabels[id]};delete x._cached_at;return x});try{await api({action:'save_labels_batch',labels:batch});chunk.forEach((id,i)=>{if(pendingLabels[id]&&JSON.stringify({...pendingLabels[id],_cached_at:undefined})===JSON.stringify({...batch[i],_cached_at:undefined}))delete pendingLabels[id]});persistPendingLabels()}catch(e){$('dataStatus').textContent='Есть изменения, ожидающие отправки';return false}}$('dataStatus').textContent='Локальные изменения синхронизированы';return true}
 function openEditor(id){let o=ops.find(x=>x.id===id);if(!o)return;editingId=id;let l=label(o);$('editOperationInfo').textContent=`${fmtDate(o.date)} · ${o.description} · ${precise(o.amount)} · ID: ${id}`;$('editCategory').value=l.custom_category||'';$('editRole').value=l.operation_role||'';$('editScope').value=l.spending_scope||'personal';$('editPerson').value=l.related_person||'';$('editProject').value=l.project||'';$('editReimbursable').value=String(!!l.reimbursable);$('editReimbursed').value=l.reimbursed_amount||0;$('editTags').value=tagsOf(o).join(', ');$('editComment').value=l.comment||'';$('editBackdrop').classList.remove('hidden')}
 function closeEditor(){$('editBackdrop').classList.add('hidden');editingId=null}
@@ -101,4 +335,5 @@ $('recommendations').addEventListener('click',async e=>{let b=e.target.closest('
 $('bulkTag').addEventListener('click',async()=>{if(!selected.size)return alert('Сначала выбери операции');let t=prompt('Тег для выбранных операций:');if(!t)return;let batch=[...selected].map(id=>{let l={...label({id}),operation_id:id};l.tags=[...new Set([...tagsOf({id}),t.trim()])];return l});batch.forEach(l=>{labels[l.operation_id]=l;pendingLabels[l.operation_id]={...l,_cached_at:Date.now()}});persistPendingLabels();selected.clear();renderAll();await flushPendingLabels()});$('bulkScope').addEventListener('click',async()=>{if(!selected.size)return alert('Сначала выбери операции');let s=prompt('Контекст: personal / transit / work / shared','transit');if(!['personal','transit','work','shared'].includes(s))return;let batch=[...selected].map(id=>({...label({id}),operation_id:id,spending_scope:s}));batch.forEach(l=>{labels[l.operation_id]=l;pendingLabels[l.operation_id]={...l,_cached_at:Date.now()}});persistPendingLabels();selected.clear();renderAll();await flushPendingLabels()});
 $('exportCsv').addEventListener('click',()=>{let rows=[['Дата','ID','Тип','Сумма','Описание','Магазин','Категория банка','Моя категория','Теги','Контекст','Человек','Проект','Комментарий']];visibleOps().forEach(o=>{let l=label(o);rows.push([fmtDate(o.date),o.id,o.type,o.amount,o.description,o.merchant,o.bankCategory,categoryOf(o),tagsOf(o).join('|'),scopeName(scopeOf(o)),l.related_person||'',l.project||'',l.comment||''])});let csv='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='finance-operations.csv';a.click();URL.revokeObjectURL(a.href)});
 $('clearLocal').addEventListener('click',()=>{if(confirm('Очистить локальный кэш браузера? Данные в Google Sheets не удалятся.')){if(Object.keys(pendingLabels).length&&!confirm('Есть несинхронизированные изменения разметки. Удалить их без отправки?'))return;localStorage.removeItem('finance_dashboard_pending_labels_v2');pendingLabels={};persistPendingLabels();alert('Локальный кэш очищен.')}});
+$("archiveStartButton").addEventListener("click", runArchivePreparation);
 </script></body></html>
