@@ -92,6 +92,14 @@ function moscowDate(timestamp) {
   const p = moscowParts(timestamp);
   return `${p.day}.${p.month}.${p.year} ${p.hour}:${p.minute}:${p.second}`;
 }
+function sameBankFields(previous, next, headers) {
+  // Ручная группа — пользовательское поле, не часть сравнения банковских данных.
+  for (let i = 0; i < headers.length; i++) {
+    if (headers[i] === "Моя группа") continue;
+    if (String(previous[i] ?? "") !== String(next[i] ?? "")) return false;
+  }
+  return true;
+}
 function operationRow(op, headers) {
   const flat = flattenJSON(op);
   const id = flat.id;
@@ -246,6 +254,8 @@ async function sync() {
 
       const mergedHeaders = [...oldPayload.headers];
       headers.forEach(h => { if (!mergedHeaders.includes(h)) mergedHeaders.push(h); });
+      const headersChanged = mergedHeaders.length !== oldPayload.headers.length ||
+        mergedHeaders.some((h, i) => oldPayload.headers[i] !== h);
       const idIndexOld = oldPayload.headers.indexOf("ID операции");
       if (oldPayload.rows.length && idIndexOld < 0) throw new Error(`В архиве ${month} отсутствует ID операции.`);
       const oldById = new Map();
@@ -264,8 +274,6 @@ async function sync() {
         if (incomingIds.has(id)) continue;
         incomingIds.add(id);
         const previous = oldById.get(id);
-        if (!previous) added++;
-        else updated++;
         const normalized = mergedHeaders.map(h => {
           const newIndex = headers.indexOf(h);
           const oldIndex = oldPayload.headers.indexOf(h);
@@ -277,8 +285,29 @@ async function sync() {
           }
           return oldIndex >= 0 && previous ? previous[oldIndex] ?? "" : "";
         });
-        oldById.set(id, normalized);
+        if (!previous) {
+          added++;
+          oldById.set(id, normalized);
+        } else if (!sameBankFields(previous, normalized, mergedHeaders)) {
+          updated++;
+          oldById.set(id, normalized);
+        }
+        // Полностью неизменённую строку не трогаем: сохраняем исходные значения.
       }
+      addedTotal += added;
+      updatedTotal += updated;
+      processedOperations += incoming.length;
+
+      // Ничего не менялось — не шифруем, не создаём backup и не пишем в GitHub.
+      if (existingMeta && added === 0 && updated === 0 && !headersChanged) {
+        await setState({
+          status: "running", stage: "checking",
+          message: `${month}: без изменений. Проверено месяцев: ${touched + 1}.`,
+          totalOperations: operations.length, sentOperations: processedOperations
+        });
+        continue;
+      }
+
       const rows = [...oldById.values()];
       const payload = { month, headers: mergedHeaders, rows };
       const envelope = await encryptPayload(payload, archivePassword);
@@ -318,8 +347,7 @@ async function sync() {
         });
         manifestByMonth.set(month, manifest.archives[manifest.archives.length - 1]);
       }
-      addedTotal += added; updatedTotal += updated; touched++;
-      processedOperations += incoming.length;
+      touched++;
       manifest.archives.sort((a,b)=>a.month.localeCompare(b.month));
       const latestManifestFile = await getContentFile("data/manifest.json");
       await putFile("data/manifest.json", JSON.stringify(manifest, null, 2),
