@@ -123,8 +123,9 @@
       "iterations": 600000,
       "salt": "3XcF246gfHhinc8KhUQvIw==",
       "iv": "aS42tMeESWfLTQF4",
-      "status": "uploaded",
-      "uploadedAt": "2026-11-13T05:58:26.800Z"
+      "status": "verified",
+      "uploadedAt": "2026-11-13T05:58:26.800Z",
+      "verifiedAt": "2026-11-13T05:58:33.107Z"
     }
   ]
 }
