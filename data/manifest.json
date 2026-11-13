@@ -280,6 +280,19 @@
       "status": "verified",
       "uploadedAt": "2026-11-13T06:03:37.415Z",
       "verifiedAt": "2026-11-13T06:03:43.020Z"
+    },
+    {
+      "month": "2026-07",
+      "path": "data/2026-07.json.enc",
+      "count": 409,
+      "sha256": "2cf3e7c2b5ea85c8332cb8489656b81121e4fd5c36b6d810a6676859e0cf1cd4",
+      "algorithm": "AES-GCM",
+      "kdf": "PBKDF2-SHA-256",
+      "iterations": 600000,
+      "salt": "0+VweE3K3eHDaYXMy4IXUQ==",
+      "iv": "FBgWjawKR6pkgoTb",
+      "status": "uploaded",
+      "uploadedAt": "2026-11-13T06:04:00.780Z"
     }
   ]
 }
