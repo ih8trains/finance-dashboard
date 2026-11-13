@@ -155,6 +155,55 @@ tbody tr:hover{background:#ffffff08}
  *,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
 }
 
+
+/* Neutral graphite direction — reduce blue tint, keep glass restrained */
+:root{
+ --bg:#090a0c;--panel:#141517;--panel2:#1c1e21;--panel3:#272a2e;
+ --text:#f3f3f4;--muted:#92959b;--line:#303237;
+ --accent:#c5c7cb;--accent2:#e1e2e4;
+ --blue:#aeb3bb;--purple:#aaa6b0;
+ --glass:linear-gradient(145deg,#ffffff10,#ffffff04);
+ --glass-line:#ffffff18;
+ --shadow:0 14px 38px #0008;--radius:18px;
+}
+body{
+ background:
+  radial-gradient(ellipse 720px 500px at 78% -15%,#ffffff0a,transparent 70%),
+  radial-gradient(ellipse 520px 440px at 4% 58%,#aeb4bf08,transparent 72%),
+  #090a0c;
+}
+body:before{background:linear-gradient(135deg,#ffffff04,transparent 42%,#ffffff02)}
+::selection{background:#bfc2c855;color:#fff}
+.login{background:radial-gradient(ellipse at 50% 0%,#ffffff0b 0%,transparent 58%)}
+.login-card{background:linear-gradient(145deg,#202225ee,#121315f2);border-color:#ffffff19}
+.field{background:#0d0e10d9;border-color:#ffffff1a}
+.field:focus{border-color:#bfc2c777;box-shadow:0 0 0 3px #c5c7cb16;background:#151619}
+.primary{color:#171819;background:linear-gradient(135deg,#e1e2e4,#aeb1b6);box-shadow:0 5px 18px #0005,inset 0 1px #ffffffaa}
+.primary:hover{background:linear-gradient(135deg,#f0f0f1,#c2c4c8);box-shadow:0 7px 22px #0006}
+.sidebar{background:linear-gradient(160deg,#202225e8,#131416e8);border-color:#ffffff19}
+.nav-label{color:#858990}
+.nav button.active{color:#f0f0f1;background:linear-gradient(100deg,#ffffff16,#ffffff07);box-shadow:inset 2px 0 #c4c6ca,inset 0 1px #ffffff0d}
+.nav-ico{color:#a0a3a9}
+.periodbar{background:linear-gradient(135deg,#202225e8,#141517e8);border-color:#ffffff19}
+.periodbar button.active{background:#ffffff13;color:#f0f0f1;box-shadow:inset 0 1px #ffffff13}
+.kpi,.card,.table-card{background:linear-gradient(150deg,#191a1dee,#131416f2);border-color:#ffffff12}
+th{background:#202225;color:#aeb1b7}
+.pill{background:#292b2f;color:#d1d2d5}
+.pill.gold,.pill.blue{background:#303237;color:#d6d7da}
+.progress{background:#303237}
+.progress span{background:linear-gradient(90deg,#858a92,#c4c7cc)}
+.notice{border-color:#4a4d52;background:#222428;color:#d0d1d4}
+.modal{background:linear-gradient(150deg,#222427,#141517);border-color:#ffffff20}
+.tag-chip{background:#292b2f;border-color:#414349;color:#d6d7da}
+.pager button{background:#222427;border-color:#ffffff1a}
+.heat-cell{background:#222427;border-color:#ffffff13}
+.heat-cell.selected{outline-color:#c5c7cb;background:#3a3d42}
+.heat-cell.today{outline-color:#c5c7cb}
+@media(max-width:600px){
+ .sidebar{background:linear-gradient(180deg,#222427f2,#141517f2);border-color:#ffffff1c}
+ .periodbar{background:linear-gradient(135deg,#202225f2,#141517f2)}
+}
+
 </style></head><body>
 <section class="login" id="loginView"><div class="login-card"><h1>Финансовая система</h1><p>Личная аналитика и управление бюджетом</p><form id="loginForm"><input class="field" id="passwordInput" type="password" placeholder="Пароль доступа" autocomplete="current-password" required><button class="primary" id="loginButton">Войти</button></form><div class="error" id="loginError"></div></div></section>
 <div class="layout hidden" id="appView"><aside class="sidebar"><div class="brand"><div><strong>FINANCE / OS</strong><small>PERSONAL CONTROL</small></div></div><div class="nav-label">Управление</div><nav class="nav" id="mainNav"><button class="active" data-page="overview"><span class="nav-ico">◫</span><span>Обзор</span></button><button data-page="income"><span class="nav-ico">↗</span><span>Доходы</span></button><button data-page="expenses"><span class="nav-ico">↘</span><span>Расходы</span></button><button data-page="budget"><span class="nav-ico">▤</span><span>Бюджет и цели</span></button><button data-page="optimize"><span class="nav-ico">⌁</span><span>Оптимизация</span></button><button data-page="operations"><span class="nav-ico">☷</span><span>Операции</span></button><div class="nav-label">Аналитика</div><button data-page="merchants"><span class="nav-ico">▦</span><span>Магазины</span></button><button data-page="subscriptions"><span class="nav-ico">⟳</span><span>Подписки</span></button><button data-page="calendar"><span class="nav-ico">▦</span><span>Календарь</span></button><button data-page="analytics"><span class="nav-ico">⌗</span><span>Аналитика</span></button><div class="nav-label">Настройки</div><button data-page="tags"><span class="nav-ico">◇</span><span>Категории и теги</span></button><button data-page="rules"><span class="nav-ico">⚙</span><span>Автоправила</span></button><button data-page="settings"><span class="nav-ico">☰</span><span>Настройки</span></button></nav><div class="sidebar-bottom">Банковские операции из GitHub<br>Разметка хранится в GitHub</div></aside>
