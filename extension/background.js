@@ -165,6 +165,16 @@ async function getContentFile(path) {
     throw e;
   }
 }
+async function deleteContentFile(path, message = "Remove obsolete backup") {
+  const file = await getContentFile(path);
+  if (!file) return false;
+  await githubRequest(path, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message, sha: file.sha, branch: BRANCH })
+  });
+  return true;
+}
 async function readContentJson(path) {
   const file = await getContentFile(path);
   if (!file || !file.content) throw new Error(`Не удалось прочитать ${path} через GitHub Contents API.`);
@@ -313,7 +323,9 @@ async function sync() {
       const envelope = await encryptPayload(payload, archivePassword);
       const archivePath = existingMeta?.path || `data/${month}.json.enc`;
 
+      let previousBackupPath = "";
       if (existingMeta) {
+        previousBackupPath = existingMeta.backupPath || "";
         const backupPath = `data/backups/sync-${Date.now()}-${month}/${month}.json.enc`;
         await putFile(backupPath, JSON.stringify(currentEnvelope), `Backup ${month} before sync`);
         // Retrieve backup SHA for verification before touching the original.
@@ -356,6 +368,16 @@ async function sync() {
       const checkedMonth = manifestCheck.archives?.find(x => x.month === month);
       if (!checkedMonth || checkedMonth.sha256 !== envelope.sha256 || Number(checkedMonth.count) !== rows.length)
         throw new Error(`Проверка manifest после ${month} не пройдена.`);
+
+      // Удаляем предыдущую копию только после успешной записи и проверки нового архива и manifest.
+      if (previousBackupPath && previousBackupPath !== checkedMonth.backupPath) {
+        try {
+          await deleteContentFile(previousBackupPath, `Prune previous backup ${month}`);
+        } catch (cleanupError) {
+          console.warn(`Не удалось удалить старую резервную копию ${previousBackupPath}:`, cleanupError);
+        }
+      }
+
       await setState({
         status: "running", stage: "writing",
         message: `${month}: добавлено ${added}, обновлено ${updated}. Проверено месяцев: ${touched}.`,
