@@ -14,11 +14,6 @@ const CONFIG = {
   INSERT_BATCH_SIZE: 500
 };
 
-
-// =====================================================
-// ОСНОВНОЙ ОБРАБОТЧИК
-// =====================================================
-
 function doPost(e) {
   try {
     if (
@@ -130,21 +125,11 @@ function doPost(e) {
   }
 }
 
-
-// =====================================================
-// JSON RESPONSE
-// =====================================================
-
 function jsonResponse(data) {
   return ContentService
     .createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
 }
-
-
-// =====================================================
-// СТАРАЯ СИНХРОНИЗАЦИЯ
-// =====================================================
 
 function syncRawOperations(dataByMonth) {
   const lock = LockService.getScriptLock();
@@ -202,11 +187,6 @@ function syncRawOperations(dataByMonth) {
     lock.releaseLock();
   }
 }
-
-
-// =====================================================
-// СИНХРОНИЗАЦИЯ МЕСЯЦА
-// =====================================================
 
 function syncMonth(
   ss,
@@ -403,8 +383,6 @@ function syncMonth(
     }
   }
 
-  // Обновление существующих операций
-
   if (changedRows.size > 0) {
     const affectedRows = Array.from(
       changedRows.keys()
@@ -469,8 +447,6 @@ function syncMonth(
       ).setValues(matrix);
     }
   }
-
-  // Добавление новых операций
 
   let added = 0;
 
@@ -539,11 +515,6 @@ function syncMonth(
   };
 }
 
-
-// =====================================================
-// НОМЕР КОЛОНКИ → БУКВА
-// =====================================================
-
 function columnToLetter(column) {
   let letter = "";
 
@@ -562,19 +533,12 @@ function columnToLetter(column) {
   return letter;
 }
 
-
-// =====================================================
-// ДАННЫЕ ДЛЯ ДАШБОРДА
-// =====================================================
-
 function getDashboardData() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheets = ss.getSheets();
 
   let allHeaders = [];
   const allData = [];
-
-  // Каждый лист читается только один раз
 
   for (const sheet of sheets) {
     const sheetName = sheet.getName();
@@ -620,8 +584,6 @@ function getDashboardData() {
     });
   }
 
-  // Объединение операций в единую структуру
-
   const normalizedData = [];
 
   for (const item of allData) {
@@ -638,8 +600,6 @@ function getDashboardData() {
     }
   }
 
-  // Метаданные
-
   const meta = getDashboardMeta();
 
   return jsonResponse({
@@ -652,17 +612,11 @@ function getDashboardData() {
   });
 }
 
-
-// =====================================================
-// ПОЛЬЗОВАТЕЛЬСКИЕ ДАННЫЕ ДАШБОРДА
-// =====================================================
-
 const META_SHEETS = {
   LABELS: "UserLabels",
   SETTINGS: "DashboardSettings",
   RULES: "DashboardRules"
 };
-
 
 function ensureMetaSheet_(name, headers) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -684,7 +638,6 @@ function ensureMetaSheet_(name, headers) {
 
   return sheet;
 }
-
 
 function getDashboardMeta() {
   const labelsSheet = ensureMetaSheet_(
@@ -752,7 +705,6 @@ function getDashboardMeta() {
   };
 }
 
-
 function readObjects_(sheet) {
   const values = sheet.getDataRange().getValues();
 
@@ -777,11 +729,6 @@ function readObjects_(sheet) {
       return obj;
     });
 }
-
-
-// =====================================================
-// СОХРАНЕНИЕ РАЗМЕТКИ
-// =====================================================
 
 function saveOperationLabel(label) {
   if (!label.operation_id) {
@@ -867,7 +814,6 @@ function saveOperationLabel(label) {
     operation_id: obj.operation_id
   };
 }
-
 
 function saveOperationLabelsBatch(labels) {
   if (!Array.isArray(labels) || labels.length > 500) {
@@ -1003,11 +949,6 @@ function saveOperationLabelsBatch(labels) {
   };
 }
 
-
-// =====================================================
-// СОХРАНЕНИЕ НАСТРОЕК
-// =====================================================
-
 function saveDashboardSettings(settings) {
   const sheet = ensureMetaSheet_(
     META_SHEETS.SETTINGS,
@@ -1060,11 +1001,6 @@ function saveDashboardSettings(settings) {
   };
 }
 
-
-// =====================================================
-// УДАЛЕНИЕ ПРАВИЛ
-// =====================================================
-
 function deleteDashboardRule(id) {
   const sheet = ensureMetaSheet_(
     META_SHEETS.RULES,
@@ -1104,13 +1040,6 @@ function deleteDashboardRule(id) {
   };
 }
 
-
-// =====================================================
-// ЗАЩИЩЁННОЕ АРХИВИРОВАНИЕ В GITHUB
-// Первый этап: выгрузка, шифрование в браузере,
-// загрузка и проверка. Удаления из Sheets здесь нет.
-// =====================================================
-
 const ARCHIVE_CONFIG_ = {
   REPOSITORY: "ih8trains/finance-dashboard",
   BRANCH: "main",
@@ -1119,7 +1048,6 @@ const ARCHIVE_CONFIG_ = {
   ROLLING_DAYS: 30,
   STATEMENT_DAY: 19
 };
-
 
 function handleArchiveAction_(request) {
   const action = String(request.action || "");
@@ -1149,7 +1077,6 @@ function handleArchiveAction_(request) {
 
   throw new Error("Неизвестная команда архивирования: " + action);
 }
-
 
 function archiveListCandidates_() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -1195,8 +1122,6 @@ function archiveListCandidates_() {
       23, 59, 59
     );
 
-    // Архивируем только после 19-го числа следующего месяца
-    // и после выхода всего месяца за rolling 30-day window.
     if (now < statementDate || monthEnd > cutoff) return;
 
     const lastRow = sheet.getLastRow();
@@ -1242,7 +1167,6 @@ function archiveListCandidates_() {
     candidates: candidates
   };
 }
-
 
 function archiveParseSheetMonth_(sheetName) {
   const normalized = String(sheetName || "")
@@ -1294,7 +1218,6 @@ function archiveParseSheetMonth_(sheetName) {
     key: year + "-" + String(monthIndex + 1).padStart(2, "0")
   };
 }
-
 
 function archiveGetMonth_(monthValue) {
   const monthInfo = archiveParseSheetMonth_(monthValue);
@@ -1362,7 +1285,6 @@ function archiveGetMonth_(monthValue) {
     }
   };
 }
-
 
 function archiveUpload_(request) {
   const month = String(request.month || "");
@@ -1458,7 +1380,6 @@ function archiveUpload_(request) {
   };
 }
 
-
 function archiveMarkVerified_(request) {
   const month = String(request.month || "");
   const sha256 = String(request.sha256 || "");
@@ -1495,7 +1416,6 @@ function archiveMarkVerified_(request) {
   };
 }
 
-
 function archiveReadManifest_() {
   const file = githubGetFile_(ARCHIVE_CONFIG_.MANIFEST_PATH);
 
@@ -1520,7 +1440,6 @@ function archiveReadManifest_() {
 
   return manifest;
 }
-
 
 function githubGetFile_(path) {
   const token = PropertiesService
@@ -1570,7 +1489,6 @@ function githubGetFile_(path) {
     content: Utilities.newBlob(bytes).getDataAsString("UTF-8")
   };
 }
-
 
 function githubPutFile_(path, content, message, sha) {
   const token = PropertiesService
@@ -1623,7 +1541,6 @@ function githubPutFile_(path, content, message, sha) {
 
   return JSON.parse(response.getContentText());
 }
-
 
 function githubWriteManifest_(manifest) {
   const path = ARCHIVE_CONFIG_.MANIFEST_PATH;
