@@ -153,6 +153,22 @@ function archiveStatus(message) {
   $("archiveStatus").textContent = message;
 }
 
+function archiveCanonicalMonth_(value) {
+  const text = String(value || "").trim();
+  const numeric = text.match(/^(\d{4})-(\d{2})$/);
+  if (numeric) return text;
+
+  const names = {
+    "январь": "01", "февраль": "02", "март": "03",
+    "апрель": "04", "май": "05", "июнь": "06",
+    "июль": "07", "август": "08", "сентябрь": "09",
+    "октябрь": "10", "ноябрь": "11", "декабрь": "12"
+  };
+  const match = text.toLowerCase().replace(/ё/g, "е").match(/^([а-я]+)\s+(\d{4})$/);
+  if (!match || !names[match[1]]) return "";
+  return match[2] + "-" + names[match[1]];
+}
+
 async function runArchivePreparation() {
   const passphrase = $("archivePassword").value;
   const button = $("archiveStartButton");
@@ -196,6 +212,11 @@ async function runArchivePreparation() {
         throw new Error("Сервер вернул некорректную запись месяца: отсутствует month.");
       }
 
+      const monthKey = archiveCanonicalMonth_(candidate.month);
+      if (!monthKey) {
+        throw new Error("Не удалось определить код месяца из значения: " + String(candidate.month));
+      }
+
       const listedCount = Number(candidate.count ?? candidate.rowsCount);
       const hasListedCount = Number.isFinite(listedCount) && listedCount >= 0;
 
@@ -209,13 +230,13 @@ async function runArchivePreparation() {
 
       const source = await api({
         action: "archive_get_month",
-        month: candidate.month
+        month: monthKey
       });
 
       const payload = source.payload;
       if (
         !payload ||
-        payload.month !== candidate.month ||
+        payload.month !== monthKey ||
         !Array.isArray(payload.headers) ||
         !Array.isArray(payload.rows)
       ) {
@@ -262,7 +283,7 @@ async function runArchivePreparation() {
 
       const uploaded = await api({
         action: "archive_upload",
-        month: candidate.month,
+        month: monthKey,
         envelope: envelope
       });
 
@@ -277,7 +298,7 @@ async function runArchivePreparation() {
       const downloadedEnvelope = await response.json();
 
       if (
-        downloadedEnvelope.month !== candidate.month ||
+        downloadedEnvelope.month !== monthKey ||
         downloadedEnvelope.sha256 !== sha256 ||
         Number(downloadedEnvelope.count) !== payload.rows.length
       ) {
@@ -304,7 +325,7 @@ async function runArchivePreparation() {
       const restored = JSON.parse(decoder.decode(decryptedBytes));
 
       if (
-        restored.month !== candidate.month ||
+        restored.month !== monthKey ||
         !Array.isArray(restored.rows) ||
         restored.rows.length !== Number(downloadedEnvelope.count)
       ) {
@@ -313,7 +334,7 @@ async function runArchivePreparation() {
 
       await api({
         action: "archive_mark_verified",
-        month: candidate.month,
+        month: monthKey,
         sha256: verifiedHash,
         count: restored.rows.length
       });
