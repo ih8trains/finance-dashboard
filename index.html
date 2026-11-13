@@ -209,7 +209,7 @@ async function runArchivePasswordMigration() {
     const decoder = new TextDecoder();
     for (const item of archives) {
       const month = String(item.month || "");
-      if (!/^\\d{4}-\\d{2}$/.test(month) || !item.path) throw new Error("Некорректная запись архива в manifest.");
+      if (!/^\d{4}-\d{2}$/.test(month) || !item.path) throw new Error("Некорректная запись архива в manifest.");
       archiveStatus("Проверяю и перешифровываю " + month + " · " +
         (completed + 1) + " из " + archives.length + "…");
 
