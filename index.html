@@ -255,7 +255,6 @@ async function runArchivePreparation() {
         );
       }
 
-      // Дальше используем фактическое число строк из полученного payload.
       candidate.count = actualCount;
 
       const plaintext = encoder.encode(JSON.stringify(payload));
