@@ -1056,6 +1056,14 @@ function handleArchiveAction_(request) {
     return archiveListCandidates_();
   }
 
+  if (action === "archive_rebuild_list") {
+    return archiveRebuildList_();
+  }
+
+  if (action === "archive_get_month_source") {
+    return archiveGetMonthSource_(String(request.month || ""));
+  }
+
   if (action === "archive_get_month") {
     return archiveGetMonth_(String(request.month || ""));
   }
@@ -1169,6 +1177,75 @@ function archiveListCandidates_() {
       "yyyy-MM-dd"
     ),
     candidates: candidates
+  };
+}
+
+function archiveRebuildList_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const result = [];
+
+  ss.getSheets().forEach(sheet => {
+    const monthInfo = archiveParseSheetMonth_(sheet.getName());
+    if (!monthInfo) return;
+
+    const lastRow = sheet.getLastRow();
+    const lastColumn = sheet.getLastColumn();
+    if (lastRow < 2 || lastColumn < 1) return;
+
+    const headers = sheet.getRange(1, 1, 1, lastColumn)
+      .getValues()[0].map(value => String(value));
+    const idIndex = headers.indexOf(CONFIG.ID_COLUMN);
+    if (idIndex < 0) return;
+
+    const rows = sheet.getRange(2, 1, lastRow - 1, lastColumn).getValues();
+    const count = rows.filter(row => String(row[idIndex] || "").trim() !== "").length;
+    if (!count) return;
+
+    result.push({
+      month: monthInfo.key,
+      sheetName: sheet.getName(),
+      count: count
+    });
+  });
+
+  result.sort((a, b) => a.month.localeCompare(b.month));
+  return { status: "success", candidates: result, totalMonths: result.length,
+    totalOperations: result.reduce((sum, item) => sum + item.count, 0) };
+}
+
+function archiveGetMonthSource_(monthValue) {
+  const monthInfo = archiveParseSheetMonth_(monthValue);
+  if (!monthInfo) throw new Error("Некорректный месяц: " + String(monthValue));
+
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheets().find(item => {
+    const parsed = archiveParseSheetMonth_(item.getName());
+    return parsed && parsed.key === monthInfo.key;
+  });
+
+  if (!sheet) throw new Error("В Google Sheets не найден лист за " + monthInfo.key + ".");
+
+  const values = sheet.getDataRange().getValues();
+  if (values.length < 2) throw new Error("В листе " + sheet.getName() + " нет операций.");
+
+  const headers = values[0].map(value => String(value));
+  const idIndex = headers.indexOf(CONFIG.ID_COLUMN);
+  if (idIndex < 0) throw new Error("В листе отсутствует колонка ID операции.");
+
+  const rows = values.slice(1).filter(row => String(row[idIndex] || "").trim() !== "");
+  if (!rows.length) throw new Error("В листе " + sheet.getName() + " нет строк с ID операции.");
+
+  return {
+    status: "success",
+    payload: {
+      schemaVersion: 1,
+      month: monthInfo.key,
+      sheetName: sheet.getName(),
+      exportedAt: new Date().toISOString(),
+      headers: headers,
+      rows: rows,
+      count: rows.length
+    }
   };
 }
 
