@@ -345,6 +345,20 @@
       "backupPath": "data/backups/rebuild-1794554683386-2026-09/2026-09.json.enc",
       "uploadedAt": "2026-11-13T07:24:53.212Z",
       "verifiedAt": "2026-11-13T07:24:57.967Z"
+    },
+    {
+      "month": "2026-10",
+      "path": "data/2026-10.json.enc",
+      "count": 327,
+      "sha256": "17b35380d1f115c3230f9cbbbfc25478bc1e8580a996345f10e6b620b9294084",
+      "algorithm": "AES-GCM",
+      "kdf": "PBKDF2-SHA-256",
+      "iterations": 600000,
+      "salt": "a4mi5N0I6wgTD8dyx7FFLw==",
+      "iv": "+QLe/29MjOVqtXRu",
+      "status": "uploaded",
+      "backupPath": "data/backups/rebuild-1794555049576-2026-10/2026-10.json.enc",
+      "uploadedAt": "2026-11-13T07:30:57.238Z"
     }
   ]
 }
