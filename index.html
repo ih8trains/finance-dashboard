@@ -392,10 +392,24 @@ async function runArchiveRebuild() {
       return;
     }
 
+    currentStage = "получение манифеста архивов GitHub";
+    const manifestResult = await archiveRetryRequest_(() => api({
+      action: "archive_get_manifest"
+    }), currentStage);
+
+    const manifestArchives = Array.isArray(manifestResult.manifest?.archives)
+      ? manifestResult.manifest.archives
+      : [];
+
+    const manifestByMonth = new Map(
+      manifestArchives.map(item => [item.month, item])
+    );
+
     const encoder = new TextEncoder();
     const decoder = new TextDecoder();
 
     let completed = 0;
+    let skipped = 0;
 
     for (const candidate of candidates) {
       if (!candidate || !candidate.month) {
@@ -409,6 +423,35 @@ async function runArchiveRebuild() {
 
       const listedCount = Number(candidate.count ?? candidate.rowsCount);
       const hasListedCount = Number.isFinite(listedCount) && listedCount >= 0;
+      const existingArchive = manifestByMonth.get(monthKey);
+
+      // Пропускаем только архивы, созданные текущей пересборкой из Sheets,
+      // уже прошедшие проверку и имеющие совпадающее количество операций.
+      const alreadyRebuilt =
+        existingArchive &&
+        existingArchive.status === "verified" &&
+        String(existingArchive.backupPath || "").includes("/backups/rebuild-") &&
+        hasListedCount &&
+        Number(existingArchive.count) === listedCount;
+
+      if (alreadyRebuilt) {
+        skipped++;
+
+        const line = document.createElement("div");
+        line.className = "metric-row";
+        line.textContent =
+          candidate.month + " · " +
+          listedCount.toLocaleString("ru-RU") +
+          " операций · уже проверен, повторная загрузка пропущена";
+        $("archiveMonths").appendChild(line);
+
+        archiveStatus(
+          "Продолжаю пересборку: " + candidate.month +
+          " уже проверен и пропущен. Обработано: " + completed +
+          ", пропущено: " + skipped + " из " + candidates.length + "."
+        );
+        continue;
+      }
 
       archiveStatus(
         "Пересоздаю архив из Google Sheets: " + candidate.month +
@@ -556,8 +599,10 @@ async function runArchiveRebuild() {
     }
 
     archiveStatus(
-      "Готово: " + completed + " архивов заново созданы из Google Sheets и прошли проверку SHA-256 и количества операций. " +
-      "Исходные строки в Google Sheets не удалялись; старые файлы сохранены в резервных копиях."
+      "Готово: создано и проверено заново — " + completed +
+      "; ранее проверенных архивов пропущено — " + skipped +
+      "; всего месяцев — " + candidates.length + ". " +
+      "Исходные строки Google Sheets не изменялись."
     );
 
   } catch (error) {
