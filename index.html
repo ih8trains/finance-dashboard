@@ -45,7 +45,7 @@
 <script>
 const API_URL='https://script.google.com/macros/s/AKfycbzuhA9zufi1HOSvSF3q6l599aNIIWg6FV3k-hGV-teqFkQFQWh4uPzFIMZNBB3OrYguyA/exec';
 const $=id=>document.getElementById(id),money=v=>new Intl.NumberFormat('ru-RU',{style:'currency',currency:'RUB',maximumFractionDigits:0}).format(v||0),precise=v=>new Intl.NumberFormat('ru-RU',{style:'currency',currency:'RUB',maximumFractionDigits:2}).format(v||0),fmtDate=d=>new Intl.DateTimeFormat('ru-RU',{day:'2-digit',month:'short',year:'numeric'}).format(d),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const LABEL_CACHE_KEY='finance_dashboard_pending_labels_v2';const USER_DATA_PATH='data/user-data.json.enc';const USER_DATA_ITERATIONS=600000;let pendingLabels=readPendingLabels(),selectedCalendarDate='';let password='',githubToken='',userDataSha=null,rawHeaders=[],rawRows=[],ops=[],labels={},settings={budget:{total:0,income:0,saving:20,emergency:0,limits:{},goals:[]},rules:[],hiddenRecommendations:[]},rules=[],charts={},activeRange='currentMonth',currentPage=1,pageSize=40,selected=new Set(),editingId=null,activePage='overview',lastMeta={};
+const LABEL_CACHE_KEY='finance_dashboard_pending_labels_v2';const USER_DATA_PATH='data/user-data.json.enc';const USER_DATA_ITERATIONS=600000;let pendingLabels=readPendingLabels(),selectedCalendarDate='';let password='',githubToken='',userDataSha=null,persistedUserDataFingerprint=null,rawHeaders=[],rawRows=[],ops=[],labels={},settings={budget:{total:0,income:0,saving:20,emergency:0,limits:{},goals:[]},rules:[],hiddenRecommendations:[]},rules=[],charts={},activeRange='currentMonth',currentPage=1,pageSize=40,selected=new Set(),editingId=null,activePage='overview',lastMeta={};
 const pageMeta={overview:['Обзор','Главное о денежных потоках за выбранный период'],income:['Доходы','Источники, динамика и структура поступлений'],expenses:['Расходы','Личное потребление без транзитных платежей'],budget:['Бюджет и цели','Планирование расходов, накоплений и финансовой подушки'],optimize:['Оптимизация','Обнаружение утечек и возможностей сократить расходы'],operations:['Журнал операций','Полная история, поиск, фильтры и пользовательская разметка'],merchants:['Магазины','Расходы по брендам и торговым точкам'],subscriptions:['Подписки','Повторяющиеся платежи и регулярные списания'],calendar:['Календарь','Распределение расходов по дням и неделе'],analytics:['Аналитика','Сравнение периодов, привычки и география'],tags:['Категории и теги','Пользовательская классификация операций'],rules:['Автоправила','Автоматизация повторяющейся разметки'],settings:['Настройки','Модель учёта и диагностика данных']};
 function pick(row,...keys){for(const k of keys){if(row[k]!==undefined&&row[k]!==null&&row[k]!=='')return row[k]}return ''}function num(v){if(typeof v==='number')return Number.isFinite(v)?v:0;let n=Number(String(v??'').replace(/\s/g,'').replace(',','.'));return Number.isFinite(n)?n:0}function truth(v){return v===true||v===1||['true','1','да','yes'].includes(String(v).trim().toLowerCase())}function parseDate(v){if(v instanceof Date&&!isNaN(v))return v; if(typeof v==='number'&&v>1000000000){let d=new Date(v);if(!isNaN(d))return d}let s=String(v??'').trim();if(!s)return null;let m=s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);if(m)return new Date(+m[3],+m[2]-1,+m[1],+(m[4]||0),+(m[5]||0),+(m[6]||0));let d=new Date(s);return isNaN(d)?null:d}function bad(s){return !s||/#(REF|ERROR|N\/A|VALUE)!?/i.test(s)||/не размечено/i.test(s)}function normBool(v){return truth(v)}
 function readPendingLabels(){try{return JSON.parse(localStorage.getItem(LABEL_CACHE_KEY)||'{}')}catch(e){return {}}}function persistPendingLabels(){localStorage.setItem(LABEL_CACHE_KEY,JSON.stringify(pendingLabels));updatePendingStatus()}function updatePendingStatus(){let n=Object.keys(pendingLabels).length,el=$('pendingStatus');if(el)el.textContent=n?`· ${n} изменений в локальном кэше`:''}function logoValue(v){if(!v)return '';if(typeof v==='string')return v.trim();if(typeof v==='object')return String(v.url||v.uri||v.src||v.logo||'');return ''}function merchantIcon(o,size=30){let u=logoValue(o.logo);return u?`<img class="merchant-logo" src="${esc(u)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<span class=&quot;merchant-icon&quot;>${avatar(o.merchant)}</span>'">`:`<span class="merchant-icon">${avatar(o.merchant)}</span>`}
@@ -128,8 +128,10 @@ function getGitHubToken(){
  if(!value||!value.trim())throw new Error('Сохранение отменено: не указан GitHub token.');
  githubToken=value.trim();return githubToken;
 }
+function userDataFingerprint(data){return JSON.stringify({version:1,labels:data.labels||{},settings:data.settings||{},rules:data.rules||[]})}
 async function saveUserData(){
  const data={version:1,updatedAt:new Date().toISOString(),labels:{...labels,...Object.fromEntries(Object.entries(pendingLabels).map(([id,value])=>{const clean={...value};delete clean._cached_at;return [id,clean]}))},settings:{...settings,rules:[...rules]},rules:[...rules]};
+ if(persistedUserDataFingerprint!==null&&userDataFingerprint(data)===persistedUserDataFingerprint){$('dataStatus').textContent='Изменений нет — GitHub не обновлялся';return true}
  const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
  const key=await archiveDeriveKey(password,salt,['encrypt'],USER_DATA_ITERATIONS);
  const plain=new TextEncoder().encode(JSON.stringify(data));
@@ -144,6 +146,7 @@ async function saveUserData(){
  const write=await fetch(apiUrl,{method:'PUT',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify(body)});
  if(!write.ok){const err=await write.json().catch(()=>({}));throw new Error('Не удалось записать файл в GitHub. HTTP '+write.status+(err.message?': '+err.message:''));}
  const result=await write.json();userDataSha=result.content?.sha||null;
+ persistedUserDataFingerprint=userDataFingerprint(data);
  Object.keys(pendingLabels).forEach(id=>delete pendingLabels[id]);persistPendingLabels();
  $('dataStatus').textContent='Разметка и настройки сохранены в зашифрованном файле GitHub';
  return true;
@@ -157,12 +160,13 @@ async function loadDashboard(pass){
  const userDataStart=performance.now();
  const userData=await loadUserData(pass);
  labels=userData.labels||{};settings={...settings,...(userData.settings||{})};rules=Array.isArray(userData.rules)?userData.rules:(Array.isArray(settings.rules)?settings.rules:[]);
- Object.entries(pendingLabels).forEach(([id,l])=>labels[id]={...labels[id],...l});
  timings.userData=Math.round(performance.now()-userDataStart);
  rawHeaders=data.headers;rawRows=data.rows;
  const normalizeStart=performance.now();let n=normalize(rawHeaders,rawRows);ops=n.items;lastMeta=n;
  settings.budget=settings.budget||{total:0,income:0,saving:20,emergency:0,limits:{},goals:[]};settings.budget.limits=settings.budget.limits||{};settings.budget.goals=settings.budget.goals||[];settings.hiddenRecommendations=settings.hiddenRecommendations||[];
  if(!settings.budget)settings.budget={total:0,income:0,saving:20,emergency:0,limits:{},goals:[]};
+ persistedUserDataFingerprint=userDataFingerprint({labels,settings:{...settings,rules:[...rules]},rules:[...rules]});
+ Object.entries(pendingLabels).forEach(([id,l])=>labels[id]={...labels[id],...l});
  timings.normalize=Math.round(performance.now()-normalizeStart);
  const rulesStart=performance.now();applyRules();timings.rules=Math.round(performance.now()-rulesStart);
  $('loginView').classList.add('hidden');$('appView').classList.remove('hidden');
