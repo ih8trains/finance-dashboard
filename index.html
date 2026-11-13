@@ -82,7 +82,7 @@ async function loadArchiveData(pass){
  if(!archives.length)throw new Error('В манифесте нет проверенных архивов.');
  const decoder=new TextDecoder();
  const loaded=await Promise.all(archives.map(async item=>{
-  if(!/^\\d{4}-\\d{2}$/.test(String(item.month))||!item.path)throw new Error('Некорректная запись месяца в манифесте.');
+  if(!/^\d{4}-\d{2}$/.test(String(item.month))||!item.path)throw new Error('Некорректная запись месяца в манифесте.');
   const url='https://raw.githubusercontent.com/ih8trains/finance-dashboard/main/'+item.path.split('/').map(encodeURIComponent).join('/');
   const response=await fetch(url);
   if(!response.ok)throw new Error('Не удалось загрузить архив '+item.month+'. HTTP '+response.status);
