@@ -356,9 +356,10 @@
       "iterations": 600000,
       "salt": "a4mi5N0I6wgTD8dyx7FFLw==",
       "iv": "+QLe/29MjOVqtXRu",
-      "status": "uploaded",
+      "status": "verified",
       "backupPath": "data/backups/rebuild-1794555049576-2026-10/2026-10.json.enc",
-      "uploadedAt": "2026-11-13T07:30:57.238Z"
+      "uploadedAt": "2026-11-13T07:30:57.238Z",
+      "verifiedAt": "2026-11-13T07:31:03.416Z"
     }
   ]
 }
