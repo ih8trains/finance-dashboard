@@ -1296,11 +1296,13 @@ function archiveParseSheetMonth_(sheetName) {
 }
 
 
-function archiveGetMonth_(monthKey) {
-  if (!/^\d{4}-\d{2}$/.test(monthKey)) {
-    throw new Error("Некорректный месяц архива.");
+function archiveGetMonth_(monthValue) {
+  const monthInfo = archiveParseSheetMonth_(monthValue);
+  if (!monthInfo) {
+    throw new Error("Некорректный месяц архива: " + String(monthValue));
   }
 
+  const monthKey = monthInfo.key;
   const candidateResult = archiveListCandidates_();
   const candidate = candidateResult.candidates.find(
     item => item.month === monthKey
