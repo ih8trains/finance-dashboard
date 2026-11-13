@@ -273,3 +273,10 @@
 - Нельзя менять signing key после первой установки: это изменит ID расширения и может потребовать переустановки.
 - Не публиковать PAT, пароль архивов или приватный signing key в артефактах, логах Actions или исходниках.
 - Не начинать реализацию до успешной проверки v4.0.6 на реальных данных.
+
+
+## 2026-11-13 — Subscription display and GitHub token session persistence
+- Fixed monthly estimate for recurring payments with 30-day frequency: display the entered amount as-is (e.g. 755 RUB remains 755 RUB). Other frequencies retain normalization using 30.4 / frequency.
+- GitHub write PAT is now cached in sessionStorage after first entry. It survives page reloads and login/logout within the same browser tab, and is cleared when the tab/session is closed. It is not written to GitHub or local persistent storage.
+- Verification still required in browser: confirm monthly 755 RUB displays as 755 RUB; make a test edit, reload the page in the same tab, make another edit and confirm no second PAT prompt. Closing the tab should require the PAT again.
+- Security note: sessionStorage is accessible to page scripts while the tab is open; use a narrowly scoped Fine-grained PAT and revoke it if exposed.
