@@ -198,7 +198,7 @@ async function runArchivePasswordMigration() {
     archiveStatus("Получаю manifest и проверяю список архивов…");
     const result = await api({ action: "archive_get_manifest" });
     const archives = result.manifest && Array.isArray(result.manifest.archives)
-      ? result.manifest.archives.filter(x => x && x.status === "verified")
+      ? result.manifest.archives.filter(x => x && (x.status === "verified" || (x.status === "uploaded" && x.backupPath)))
       : [];
     if (!archives.length) throw new Error("В manifest нет архивов со статусом verified. Ничего не изменено.");
 
@@ -225,16 +225,27 @@ async function runArchivePasswordMigration() {
         throw new Error("Метаданные архива " + month + " не совпали с manifest.");
       }
 
-      const oldKey = await archiveDeriveKey(oldPassphrase,
-        archiveBase64ToBytes(envelope.salt), ["decrypt"], Number(envelope.iterations));
       let plaintextBuffer;
+      let alreadyUsingCurrentPassword = false;
       try {
+        const currentKey = await archiveDeriveKey(password,
+          archiveBase64ToBytes(envelope.salt), ["decrypt"], Number(envelope.iterations));
         plaintextBuffer = await crypto.subtle.decrypt(
           { name: "AES-GCM", iv: archiveBase64ToBytes(envelope.iv) },
-          oldKey, archiveBase64ToBytes(envelope.ciphertext)
+          currentKey, archiveBase64ToBytes(envelope.ciphertext)
         );
+        alreadyUsingCurrentPassword = true;
       } catch (_) {
-        throw new Error("Не удалось расшифровать " + month + ". Проверь старый пароль. Исходный архив не заменён.");
+        try {
+          const oldKey = await archiveDeriveKey(oldPassphrase,
+            archiveBase64ToBytes(envelope.salt), ["decrypt"], Number(envelope.iterations));
+          plaintextBuffer = await crypto.subtle.decrypt(
+            { name: "AES-GCM", iv: archiveBase64ToBytes(envelope.iv) },
+            oldKey, archiveBase64ToBytes(envelope.ciphertext)
+          );
+        } catch (_) {
+          throw new Error("Не удалось расшифровать " + month + ". Проверь старый пароль. Исходный архив не заменён.");
+        }
       }
 
       const plaintext = new Uint8Array(plaintextBuffer);
@@ -244,6 +255,18 @@ async function runArchivePasswordMigration() {
       if (payload.month !== month || !Array.isArray(payload.rows) ||
           payload.rows.length !== Number(envelope.count)) {
         throw new Error("Содержимое или количество операций в " + month + " не прошло проверку.");
+      }
+
+      // Позволяет безопасно продолжить миграцию после сбоя между загрузкой и отметкой verified.
+      if (alreadyUsingCurrentPassword) {
+        await api({ action: "archive_mark_verified", month, sha256: oldHash, count: payload.rows.length });
+        completed++;
+        const resumedLine = document.createElement("div");
+        resumedLine.className = "metric-row";
+        resumedLine.textContent = month + " · " + payload.rows.length.toLocaleString("ru-RU") +
+          " операций · уже зашифрован текущим паролем · проверено";
+        $("archiveMonths").appendChild(resumedLine);
+        continue;
       }
 
       // Резервная копия исходного зашифрованного файла обязательна до его замены.
