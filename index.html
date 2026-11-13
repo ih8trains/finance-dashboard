@@ -33,7 +33,7 @@
 <div class="card-head"><div><h2>Архивирование операций</h2><div class="card-desc">Архивы зашифрованы тем же паролем, которым ты входишь в дашборд. Пароль не сохраняется в браузере и не отправляется в GitHub.</div></div></div>
  <div class="form-grid">
  <div class="form-item"><label>Новые закрытые месяцы</label><button class="primary" id="archiveStartButton" type="button">Создать и проверить архивы</button></div>
- <div class="form-item"><label>Смена пароля существующих архивов</label><button class="btn" id="archiveMigrateButton" type="button">Перешифровать 23 архива</button></div>
+ <div class="form-item"><label>Смена пароля существующих архивов</label><button class="btn" id="archiveMigrateButton" type="button">Пересоздать архивы из Google Sheets</button></div>
  </div>
  <div class="footer-note">Для смены пароля один раз потребуется старый пароль архивов. Каждый исходный файл сначала копируется в резервную папку GitHub, и только после этого заменяется. Google Sheets не очищается.</div>
  <div id="archiveStatus" class="notice" style="margin-top:14px">Архивы не изменяются, пока ты не запустишь соответствующую операцию.</div>
@@ -340,7 +340,7 @@ async function runArchivePasswordMigration() {
   }
 }
 
-async function runArchivePreparation() {
+async function runArchiveRebuild() {
   const passphrase = password;
   const button = $("archiveStartButton");
 
@@ -358,10 +358,10 @@ async function runArchivePreparation() {
   $("archiveMonths").innerHTML = "";
 
   try {
-    archiveStatus("Проверяю, какие месяцы уже закрыты и готовы к архивированию…");
+    archiveStatus("Собираю полный список месячных листов Google Sheets…");
 
     const candidateResult = await api({
-      action: "archive_list_candidates"
+      action: "archive_rebuild_list"
     });
 
     const candidates = Array.isArray(candidateResult.candidates)
@@ -369,7 +369,7 @@ async function runArchivePreparation() {
       : [];
 
     if (!candidates.length) {
-      archiveStatus("Новых месяцев для архивирования нет. Уже проверенные архивы повторно не создаются.");
+      archiveStatus("В Google Sheets не найдено листов с операциями для пересоздания архивов.");
       return;
     }
 
@@ -392,7 +392,7 @@ async function runArchivePreparation() {
       const hasListedCount = Number.isFinite(listedCount) && listedCount >= 0;
 
       archiveStatus(
-        "Архивирую " + candidate.month +
+        "Пересоздаю архив из Google Sheets: " + candidate.month +
         (hasListedCount
           ? " · " + listedCount.toLocaleString("ru-RU") + " операций."
           : " · проверяю количество операций.") +
@@ -400,7 +400,7 @@ async function runArchivePreparation() {
       );
 
       const source = await api({
-        action: "archive_get_month",
+        action: "archive_get_month_source",
         month: monthKey
       });
 
@@ -451,10 +451,18 @@ async function runArchivePreparation() {
         ciphertext: archiveBytesToBase64(new Uint8Array(encrypted))
       };
 
+      const backupId = "rebuild-" + Date.now() + "-" + monthKey;
+      const backup = await api({
+        action: "archive_backup",
+        month: monthKey,
+        backupId: backupId
+      });
+
       const uploaded = await api({
         action: "archive_upload",
         month: monthKey,
-        envelope: envelope
+        envelope: envelope,
+        backupId: backupId
       });
 
       const downloadUrl = uploaded.archiveUrl +
@@ -521,13 +529,13 @@ async function runArchivePreparation() {
     }
 
     archiveStatus(
-      "Готово: " + completed + " архивов прошли проверку SHA-256 и количества операций. " +
-      "Исходные строки в Google Sheets не удалялись."
+      "Готово: " + completed + " архивов заново созданы из Google Sheets и прошли проверку SHA-256 и количества операций. " +
+      "Исходные строки в Google Sheets не удалялись; старые файлы сохранены в резервных копиях."
     );
 
   } catch (error) {
     archiveStatus("Остановлено: " + (error.message || String(error)) +
-      ". Уже проверенные месяцы сохранены; исходные данные в Google Sheets не удалялись.");
+      ". Данные Google Sheets не изменялись; ранее заменённые архивы имеют резервные копии.");
   } finally {
     button.disabled = false;
   }
@@ -551,5 +559,5 @@ $('bulkTag').addEventListener('click',async()=>{if(!selected.size)return alert('
 $('exportCsv').addEventListener('click',()=>{let rows=[['Дата','ID','Тип','Сумма','Описание','Магазин','Категория банка','Моя категория','Теги','Контекст','Человек','Проект','Комментарий']];visibleOps().forEach(o=>{let l=label(o);rows.push([fmtDate(o.date),o.id,o.type,o.amount,o.description,o.merchant,o.bankCategory,categoryOf(o),tagsOf(o).join('|'),scopeName(scopeOf(o)),l.related_person||'',l.project||'',l.comment||''])});let csv='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='finance-operations.csv';a.click();URL.revokeObjectURL(a.href)});
 $('clearLocal').addEventListener('click',()=>{if(confirm('Очистить локальный кэш браузера? Данные в Google Sheets не удалятся.')){if(Object.keys(pendingLabels).length&&!confirm('Есть несинхронизированные изменения разметки. Удалить их без отправки?'))return;localStorage.removeItem('finance_dashboard_pending_labels_v2');pendingLabels={};persistPendingLabels();alert('Локальный кэш очищен.')}});
 $("archiveStartButton").addEventListener("click", runArchivePreparation);
-$("archiveMigrateButton").addEventListener("click", runArchivePasswordMigration);
+$("archiveMigrateButton").addEventListener("click", runArchiveRebuild);
 </script></body></html>
