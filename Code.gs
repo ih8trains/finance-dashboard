@@ -1384,8 +1384,18 @@ function archiveBackupMonth_(request) {
 
   const source = githubGetFile_(sourcePath);
 
+  // Для нового месяца резервировать нечего — разрешаем первичное создание архива.
   if (!source) {
-    throw new Error("Исходный архив не найден: " + month);
+    return {
+      status: "success",
+      month: month,
+      backupId: backupId,
+      existed: false,
+      backupPath: "",
+      count: 0,
+      sha256: "",
+      backupUrl: ""
+    };
   }
 
   let envelope;
@@ -1469,10 +1479,18 @@ function archiveUpload_(request) {
   }
 
   const backupId = String(request.backupId || "");
+  const path = ARCHIVE_CONFIG_.ARCHIVE_FOLDER +
+    "/" + month + ".json.enc";
+  const existing = githubGetFile_(path);
 
-  if (backupId) {
-    if (!/^[a-zA-Z0-9_-]{8,80}$/.test(backupId)) {
-      throw new Error("Некорректный идентификатор резервной копии.");
+  // Если файл уже существует, заменять его можно только после резервирования.
+  // Для нового месяца резервная копия не требуется.
+  if (existing) {
+    if (!backupId || !/^[a-zA-Z0-9_-]{8,80}$/.test(backupId)) {
+      throw new Error(
+        "Нельзя заменить архив " + month +
+        ": отсутствует корректный идентификатор резервной копии."
+      );
     }
 
     const backupPath = ARCHIVE_CONFIG_.ARCHIVE_FOLDER +
@@ -1486,9 +1504,6 @@ function archiveUpload_(request) {
     }
   }
 
-  const path = ARCHIVE_CONFIG_.ARCHIVE_FOLDER +
-    "/" + month + ".json.enc";
-
   const fileContent = JSON.stringify({
     schemaVersion: 1,
     month: month,
@@ -1501,8 +1516,6 @@ function archiveUpload_(request) {
     count: Number(envelope.count),
     ciphertext: String(envelope.ciphertext)
   });
-
-  const existing = githubGetFile_(path);
 
   githubPutFile_(
     path,
