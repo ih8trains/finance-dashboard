@@ -357,7 +357,7 @@
       "salt": "a4mi5N0I6wgTD8dyx7FFLw==",
       "iv": "+QLe/29MjOVqtXRu",
       "status": "verified",
-      "backupPath": "data/backups/rebuild-1794555049576-2026-10/2026-10.json.enc",
+      "backupPath": "",
       "uploadedAt": "2026-11-13T07:30:57.238Z",
       "verifiedAt": "2026-11-13T07:31:03.416Z"
     },
@@ -372,7 +372,7 @@
       "salt": "AaS2Pk434sqGxSoBkxlGhg==",
       "iv": "JHGjhuw+fbcNiIF+",
       "status": "verified",
-      "backupPath": "data/backups/rebuild-1794555068121-2026-11/2026-11.json.enc",
+      "backupPath": "",
       "uploadedAt": "2026-11-13T07:31:14.284Z",
       "verifiedAt": "2026-11-13T07:31:18.624Z"
     }
