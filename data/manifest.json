@@ -155,15 +155,15 @@
       "month": "2025-09",
       "path": "data/2025-09.json.enc",
       "count": 217,
-      "sha256": "849541c609c598d51a29b1c6534a47752cab7ac1eb57017d3e7a044198b085cb",
+      "sha256": "2ec4b9834805d27bc09ea67ff61d3a80890961815aa569ad3378496a0e1bdf1e",
       "algorithm": "AES-GCM",
       "kdf": "PBKDF2-SHA-256",
       "iterations": 600000,
-      "salt": "vuHTv7P7LqhEA/iD3+JSPA==",
-      "iv": "uCA3YnGXDZLxRoC/",
-      "status": "verified",
-      "uploadedAt": "2026-11-13T05:59:30.922Z",
-      "verifiedAt": "2026-11-13T05:59:37.639Z"
+      "salt": "43HJ9SRS01qIt14q5Zns9A==",
+      "iv": "mAzCJfdkunCDhmvn",
+      "status": "uploaded",
+      "backupPath": "data/backups/rebuild-1794552551461-2025-09/2025-09.json.enc",
+      "uploadedAt": "2026-11-13T06:49:20.221Z"
     },
     {
       "month": "2025-10",
