@@ -266,6 +266,19 @@
       "status": "verified",
       "uploadedAt": "2026-11-13T06:03:15.226Z",
       "verifiedAt": "2026-11-13T06:03:20.776Z"
+    },
+    {
+      "month": "2026-06",
+      "path": "data/2026-06.json.enc",
+      "count": 285,
+      "sha256": "f83ad5c16788c7b71f1ed946a213cb35b536202ab909cd790b1ae2edaeadf172",
+      "algorithm": "AES-GCM",
+      "kdf": "PBKDF2-SHA-256",
+      "iterations": 600000,
+      "salt": "1w0+BC/Le9pp+br2jH3yOw==",
+      "iv": "T0IsqtF2ka1r0CoT",
+      "status": "uploaded",
+      "uploadedAt": "2026-11-13T06:03:37.415Z"
     }
   ]
 }
