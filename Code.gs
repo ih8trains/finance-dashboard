@@ -1224,7 +1224,8 @@ function archiveListCandidates_() {
       candidates.push({
         month: monthInfo.key,
         sheetName: sheetName,
-        count: count
+        count: count,
+        rowsCount: count
       });
     }
   });
@@ -1337,9 +1338,11 @@ function archiveGetMonth_(monthKey) {
     String(row[idIndex] || "").trim() !== ""
   );
 
-  if (rows.length !== candidate.count) {
+  const expectedCount = Number(candidate.count ?? candidate.rowsCount);
+  if (Number.isFinite(expectedCount) && expectedCount >= 0 && rows.length !== expectedCount) {
     throw new Error(
       "Количество операций изменилось во время подготовки архива. " +
+      "В списке: " + expectedCount + ", фактически: " + rows.length + ". " +
       "Повтори получение месяца."
     );
   }
