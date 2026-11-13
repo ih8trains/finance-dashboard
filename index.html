@@ -10,7 +10,7 @@
 @media(max-width:1250px){.kpis{grid-template-columns:repeat(3,1fr)}.cols-3{grid-template-columns:1fr 1fr}}@media(max-width:900px){.sidebar{width:66px;padding:18px 8px}.brand{padding:4px 11px 25px}.brand>div:last-child,.nav-label,.nav button span:last-child,.sidebar-bottom{display:none}.nav button{justify-content:center;padding:12px 6px}.nav-ico{font-size:17px}.main{margin-left:66px;padding:20px 17px 45px}.cols-2,.cols-even{grid-template-columns:1fr}}@media(max-width:600px){.main{padding:16px 10px 36px}.topbar{align-items:flex-start}.page-title h1{font-size:20px}.status{display:none}.kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.kpi{padding:12px}.kpi-value{font-size:19px}.cols-3,.two-col,.form-grid{grid-template-columns:1fr}.form-item.full{grid-column:auto}.periodbar{gap:3px}.periodbar button{padding:7px 7px;font-size:11px}.top-actions .btn{font-size:11px;padding:8px}.chart{height:230px}.card{padding:14px}.table-head{align-items:flex-start;flex-direction:column}.toolbar .field{width:100%}.toolbar .search{min-width:100%}}
 .calendar-layout{display:grid;grid-template-columns:minmax(220px,.9fr) minmax(220px,1.1fr);gap:18px;align-items:start}.calendar-detail{margin-top:0;padding:0 0 0 16px;border-top:0;border-left:1px solid var(--line);min-width:0}.calendar-main{min-width:0}.calendar-main .heatmap{max-width:430px}.calendar-main .heat-cell{min-width:0}@media(max-width:900px){.calendar-layout{grid-template-columns:1fr}.calendar-detail{margin-top:0;padding-top:0;border-top:0}}@media(max-width:600px){#mainNav button[data-page="budget"],#mainNav button[data-page="optimize"],#mainNav button[data-page="merchants"],#mainNav button[data-page="tags"],#mainNav button[data-page="rules"],#mainNav button[data-page="settings"]{display:none}.calendar-layout{grid-template-columns:1fr}.calendar-main{min-width:0}.heatmap{gap:3px}.heat-cell{border-radius:5px;font-size:9px}.calendar-grid{grid-template-columns:1fr}.calendar-detail{border-top:1px solid var(--line);padding-top:12px}.login{padding:18px}.login-card{text-align:center}.login-card form{display:grid;gap:8px}.login .primary{margin-top:0}.sidebar{position:fixed;inset:auto 0 0;width:100%;height:auto;padding:6px max(6px,env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(6px,env(safe-area-inset-left));border-right:0;border-top:1px solid var(--line);background:#0e141cf2;backdrop-filter:blur(14px);display:block}.brand,.nav-label,.sidebar-bottom{display:none}.nav{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px}.nav button{display:flex;flex-direction:column;justify-content:center;gap:2px;padding:6px 1px;border-radius:8px;font-size:9px;min-width:0}.nav button span:last-child{display:block!important;font-size:9px;white-space:nowrap}.nav-ico{font-size:15px;width:auto}.main{margin-left:0;padding:14px 10px calc(100px + env(safe-area-inset-bottom));}.topbar{gap:8px;align-items:center}.top-actions{gap:5px}.top-actions .btn{font-size:10px;padding:7px 8px}.status{display:none}.page-title h1{font-size:19px}.periodbar{position:sticky;top:0;z-index:10;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:7px}.periodbar button{padding:8px 3px;font-size:10px}.periodbar .spacer{display:none}.periodbar #scopeMode{grid-column:1/-1;width:100%}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.kpi-value{font-size:17px}.card{padding:12px}.chart{height:220px}.table-scroll{overflow:visible}table{min-width:0}thead{display:none}table,tbody,tr,td{display:block;width:100%}tbody tr{padding:10px;border-top:1px solid var(--line)}td{padding:4px 2px;border:0;font-size:11px}td:empty{display:none}.table-foot{padding:10px}.toolbar{gap:6px}.toolbar .field,.toolbar .search{min-width:0;width:100%}.form-grid{grid-template-columns:1fr}.form-item.full{grid-column:auto}.subscription-row{align-items:flex-start}.modal{padding:15px}.modal-backdrop{padding:8px}}</style></head><body>
 <section class="login" id="loginView"><div class="login-card"><h1>Финансовая система</h1><p>Личная аналитика и управление бюджетом</p><form id="loginForm"><input class="field" id="passwordInput" type="password" placeholder="Пароль доступа" autocomplete="current-password" required><button class="primary" id="loginButton">Войти</button></form><div class="error" id="loginError"></div></div></section>
-<div class="layout hidden" id="appView"><aside class="sidebar"><div class="brand"><div><strong>FINANCE / OS</strong><small>PERSONAL CONTROL</small></div></div><div class="nav-label">Управление</div><nav class="nav" id="mainNav"><button class="active" data-page="overview"><span class="nav-ico">◫</span><span>Обзор</span></button><button data-page="income"><span class="nav-ico">↗</span><span>Доходы</span></button><button data-page="expenses"><span class="nav-ico">↘</span><span>Расходы</span></button><button data-page="budget"><span class="nav-ico">▤</span><span>Бюджет и цели</span></button><button data-page="optimize"><span class="nav-ico">⌁</span><span>Оптимизация</span></button><button data-page="operations"><span class="nav-ico">☷</span><span>Операции</span></button><div class="nav-label">Аналитика</div><button data-page="merchants"><span class="nav-ico">▦</span><span>Магазины</span></button><button data-page="subscriptions"><span class="nav-ico">⟳</span><span>Подписки</span></button><button data-page="calendar"><span class="nav-ico">▦</span><span>Календарь</span></button><button data-page="analytics"><span class="nav-ico">⌗</span><span>Аналитика</span></button><div class="nav-label">Настройки</div><button data-page="tags"><span class="nav-ico">◇</span><span>Категории и теги</span></button><button data-page="rules"><span class="nav-ico">⚙</span><span>Автоправила</span></button><button data-page="settings"><span class="nav-ico">☰</span><span>Настройки</span></button></nav><div class="sidebar-bottom">Данные из Google Sheets<br>Разметка хранится отдельно от банковских операций</div></aside>
+<div class="layout hidden" id="appView"><aside class="sidebar"><div class="brand"><div><strong>FINANCE / OS</strong><small>PERSONAL CONTROL</small></div></div><div class="nav-label">Управление</div><nav class="nav" id="mainNav"><button class="active" data-page="overview"><span class="nav-ico">◫</span><span>Обзор</span></button><button data-page="income"><span class="nav-ico">↗</span><span>Доходы</span></button><button data-page="expenses"><span class="nav-ico">↘</span><span>Расходы</span></button><button data-page="budget"><span class="nav-ico">▤</span><span>Бюджет и цели</span></button><button data-page="optimize"><span class="nav-ico">⌁</span><span>Оптимизация</span></button><button data-page="operations"><span class="nav-ico">☷</span><span>Операции</span></button><div class="nav-label">Аналитика</div><button data-page="merchants"><span class="nav-ico">▦</span><span>Магазины</span></button><button data-page="subscriptions"><span class="nav-ico">⟳</span><span>Подписки</span></button><button data-page="calendar"><span class="nav-ico">▦</span><span>Календарь</span></button><button data-page="analytics"><span class="nav-ico">⌗</span><span>Аналитика</span></button><div class="nav-label">Настройки</div><button data-page="tags"><span class="nav-ico">◇</span><span>Категории и теги</span></button><button data-page="rules"><span class="nav-ico">⚙</span><span>Автоправила</span></button><button data-page="settings"><span class="nav-ico">☰</span><span>Настройки</span></button></nav><div class="sidebar-bottom">Банковские операции из GitHub<br>Разметка пока хранится локально</div></aside>
 <main class="main"><header class="topbar"><div class="page-title"><h1 id="pageHeading">Обзор</h1><p id="pageSub">Главное о денежных потоках за выбранный период</p></div><div class="top-actions"><span class="status" id="dataStatus">Ожидание данных</span><span class="pending-status" id="pendingStatus" title="Нажми, чтобы повторить отправку локальных изменений"></span><button class="btn" id="reloadButton">Обновить</button><button class="btn" id="logoutButton">Выйти</button></div></header>
 <div class="periodbar" id="periodbar"><button data-range="currentMonth" class="active">Текущий месяц</button><button data-range="month">Месяц</button><button data-range="quarter">Квартал</button><button data-range="halfYear">Полгода</button><button data-range="year">Год</button><button data-range="custom">Период</button><span class="spacer"></span><input class="field hidden" type="date" id="dateFrom"><input class="field hidden" type="date" id="dateTo"><select class="field" id="scopeMode"><option value="personal">Доходы и расходы</option><option value="all">Все операции</option></select></div>
 <section class="page active" id="page-overview"><div class="grid kpis"><article class="kpi"><div class="kpi-label">Доходы</div><div class="kpi-value positive" id="kIncome">—</div><div class="kpi-note" id="kIncomeNote">Все источники</div></article><article class="kpi"><div class="kpi-label">Расходы</div><div class="kpi-value negative" id="kExpense">—</div><div class="kpi-note" id="kExpenseNote">Все списания, кроме внутренних переводов</div></article><article class="kpi"><div class="kpi-label">Чистый результат</div><div class="kpi-value" id="kNet">—</div><div class="kpi-note">Доходы минус расходы</div></article><article class="kpi"><div class="kpi-label">Норма сбережений</div><div class="kpi-value" id="kSaving">—</div><div class="kpi-note">От чистого дохода</div></article><article class="kpi"><div class="kpi-label">Транзитные платежи</div><div class="kpi-value" id="kTransit">—</div><div class="kpi-note">За других / возмещение</div></article><article class="kpi"><div class="kpi-label">Нужно разобрать</div><div class="kpi-value" id="kUnsorted">—</div><div class="kpi-note">Неопределённые операции</div></article></div>
@@ -72,27 +72,59 @@ function renderJournal(){let q=$('opSearch').value.toLowerCase(),type=$('opType'
 function populateFilters(){let cats=[...new Set(ops.map(categoryOf))].sort();['opCategory','limitCategory'].forEach(id=>{if($(id))$(id).innerHTML=(id==='opCategory'?'<option value="all">Все категории</option>':'')+cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')});let tags=[...new Set(ops.flatMap(tagsOf))].sort();$('opTag').innerHTML='<option value="all">Все теги</option>'+tags.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('')}
 function renderAll(){populateFilters();renderCurrentPage();updatePendingStatus()}
 async function api(payload){let res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({password,...payload})});if(!res.ok)throw new Error('HTTP '+res.status);let j=await res.json();if(j.status==='error')throw new Error(j.message||'Ошибка сервера');return j}
+async function loadArchiveData(pass){
+ const manifestUrl='https://raw.githubusercontent.com/ih8trains/finance-dashboard/main/data/manifest.json';
+ const manifestResponse=await fetch(manifestUrl,{cache:'no-store'});
+ if(!manifestResponse.ok)throw new Error('Не удалось загрузить манифест архивов. HTTP '+manifestResponse.status);
+ const manifest=await manifestResponse.json();
+ if(!manifest||!Array.isArray(manifest.archives))throw new Error('Манифест архивов повреждён.');
+ const archives=manifest.archives.filter(x=>x&&x.status==='verified').sort((a,b)=>String(a.month).localeCompare(String(b.month)));
+ if(!archives.length)throw new Error('В манифесте нет проверенных архивов.');
+ const decoder=new TextDecoder();
+ const loaded=await Promise.all(archives.map(async item=>{
+  if(!/^\\d{4}-\\d{2}$/.test(String(item.month))||!item.path)throw new Error('Некорректная запись месяца в манифесте.');
+  const url='https://raw.githubusercontent.com/ih8trains/finance-dashboard/main/'+item.path.split('/').map(encodeURIComponent).join('/');
+  const response=await fetch(url);
+  if(!response.ok)throw new Error('Не удалось загрузить архив '+item.month+'. HTTP '+response.status);
+  const envelope=await response.json();
+  if(envelope.month!==item.month||envelope.algorithm!=='AES-GCM'||envelope.kdf!=='PBKDF2-SHA-256'||Number(envelope.count)!==Number(item.count)||envelope.sha256!==item.sha256||!envelope.salt||!envelope.iv||!envelope.ciphertext)throw new Error('Метаданные архива '+item.month+' не совпадают с манифестом.');
+  let decrypted;
+  try{
+   const key=await archiveDeriveKey(pass,archiveBase64ToBytes(envelope.salt),['decrypt'],Number(envelope.iterations));
+   decrypted=new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv:archiveBase64ToBytes(envelope.iv)},key,archiveBase64ToBytes(envelope.ciphertext)));
+  }catch(error){throw new Error('Не удалось расшифровать архив '+item.month+'. Проверь пароль.');}
+  if(await archiveSha256(decrypted)!==item.sha256)throw new Error('SHA-256 архива '+item.month+' не совпал.');
+  const payload=JSON.parse(decoder.decode(decrypted));
+  if(payload.month!==item.month||!Array.isArray(payload.headers)||!Array.isArray(payload.rows)||payload.rows.length!==Number(item.count))throw new Error('Содержимое архива '+item.month+' не прошло проверку.');
+  return payload;
+ }));
+ const headers=[];
+ loaded.forEach(month=>month.headers.forEach(h=>{if(!headers.includes(h))headers.push(h)}));
+ const rows=[];
+ loaded.forEach(month=>{
+  const indexes=headers.map(h=>month.headers.indexOf(h));
+  month.rows.forEach(row=>rows.push(indexes.map(i=>i<0?'':row[i]??'')));
+ });
+ return {headers,rows,months:loaded.length};
+}
 async function loadDashboard(pass){
  const totalStart=performance.now(),timings={};
- password=pass;$('loginButton').disabled=true;$('loginButton').textContent='Загрузка…';
- const apiStart=performance.now();
- const data=await api({});
- const meta=data;
- timings.api=Math.round(performance.now()-apiStart);
- if(!Array.isArray(data.headers)||!Array.isArray(data.data))throw new Error('Сервер не вернул таблицу операций');
- rawHeaders=data.headers;rawRows=data.data;
+ password=pass;$('loginButton').disabled=true;$('loginButton').textContent='Загрузка архивов…';
+ const archiveStart=performance.now();
+ const data=await loadArchiveData(pass);
+ timings.archives=Math.round(performance.now()-archiveStart);
+ rawHeaders=data.headers;rawRows=data.rows;
  const normalizeStart=performance.now();let n=normalize(rawHeaders,rawRows);ops=n.items;lastMeta=n;
- labels={};(meta.labels||[]).forEach(l=>{labels[String(l.operation_id)]={...l,tags:Array.isArray(l.tags)?l.tags:String(l.tags||'').split(',').map(x=>x.trim()).filter(Boolean),reimbursable:String(l.reimbursable)==='true'}});
- settings={...settings,...(meta.settings||{})};rules=(meta.settings?.rules||meta.rules||[]).map(r=>({...r,tags:Array.isArray(r.tags)?r.tags:String(r.tags||'').split(',').filter(Boolean)}));
- Object.entries(pendingLabels).forEach(([id,l])=>labels[id]={...l});if(!settings.budget)settings.budget={total:0,income:0,saving:20,emergency:0,limits:{},goals:[]};
+ labels={};
+ Object.entries(pendingLabels).forEach(([id,l])=>labels[id]={...l});
+ if(!settings.budget)settings.budget={total:0,income:0,saving:20,emergency:0,limits:{},goals:[]};
  timings.normalize=Math.round(performance.now()-normalizeStart);
  const rulesStart=performance.now();applyRules();timings.rules=Math.round(performance.now()-rulesStart);
  $('loginView').classList.add('hidden');$('appView').classList.remove('hidden');
- $('dataStatus').textContent=`${ops.length.toLocaleString('ru-RU')} операций · обновлено сейчас`;
+ $('dataStatus').textContent=`${ops.length.toLocaleString('ru-RU')} операций · ${data.months} месяцев · GitHub`;
  $('calendarMonth').value=new Date().toISOString().slice(0,7);
  const renderStart=performance.now();renderAll();updatePendingStatus();timings.render=Math.round(performance.now()-renderStart);
  timings.total=Math.round(performance.now()-totalStart);console.info('[Finance] Время загрузки, мс',timings);
- if(Object.keys(pendingLabels).length)flushPendingLabels().catch(console.warn)
 }
 
 const ARCHIVE_PBKDF2_ITERATIONS = 600000;
