@@ -33,9 +33,9 @@
 <div class="card-head"><div><h2>Архивирование операций</h2><div class="card-desc">Архивы зашифрованы тем же паролем, которым ты входишь в дашборд. Пароль не сохраняется в браузере и не отправляется в GitHub.</div></div></div>
  <div class="form-grid">
  <div class="form-item"><label>Новые закрытые месяцы</label><button class="primary" id="archiveStartButton" type="button">Создать и проверить архивы</button></div>
- <div class="form-item"><label>Смена пароля существующих архивов</label><button class="btn" id="archiveMigrateButton" type="button">Пересоздать архивы из Google Sheets</button></div>
+ <div class="form-item"><label>Полная пересборка из Google Sheets</label><button class="btn" id="archiveMigrateButton" type="button">Пересоздать все архивы</button></div>
  </div>
- <div class="footer-note">Для смены пароля один раз потребуется старый пароль архивов. Каждый исходный файл сначала копируется в резервную папку GitHub, и только после этого заменяется. Google Sheets не очищается.</div>
+ <div class="footer-note">Все архивы заново формируются из месячных листов Google Sheets текущим паролем входа. Перед заменой каждого существующего файла создаётся резервная копия. Исходные листы Google Sheets не изменяются.</div>
  <div id="archiveStatus" class="notice" style="margin-top:14px">Архивы не изменяются, пока ты не запустишь соответствующую операцию.</div>
  <div id="archiveMonths" style="margin-top:10px"></div>
  </article>
@@ -342,7 +342,7 @@ async function runArchivePasswordMigration() {
 
 async function runArchiveRebuild() {
   const passphrase = password;
-  const button = $("archiveStartButton");
+  const button = $("archiveMigrateButton");
 
   if (!passphrase) {
     alert("Сначала войди в дашборд.");
