@@ -131,9 +131,10 @@
       "iterations": 600000,
       "salt": "jBAtTplO4xXdyutMxJiSWw==",
       "iv": "8AA4Bi0cH8Yg7Bmq",
-      "status": "uploaded",
+      "status": "verified",
       "backupPath": "data/backups/rebuild-1794554365382-2025-07/2025-07.json.enc",
-      "uploadedAt": "2026-11-13T07:19:37.621Z"
+      "uploadedAt": "2026-11-13T07:19:37.621Z",
+      "verifiedAt": "2026-11-13T07:19:42.512Z"
     },
     {
       "month": "2025-08",
