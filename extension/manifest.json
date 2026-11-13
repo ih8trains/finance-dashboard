@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "T-Bank Auto Sync",
-  "version": "4.0.5",
+  "version": "4.0.6",
   "description": "Read-only синхронизация операций Т-Банка с зашифрованными архивами GitHub",
   "permissions": [
     "activeTab",
