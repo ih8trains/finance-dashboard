@@ -216,7 +216,7 @@ function syncMonth(
 ) {
   if (!incomingHeaders.includes(CONFIG.ID_COLUMN)) {
     throw new Error(
-      \`Во входящих данных отсутствует колонка "\${CONFIG.ID_COLUMN}".\`
+      `Во входящих данных отсутствует колонка "${CONFIG.ID_COLUMN}".`
     );
   }
 
@@ -255,7 +255,7 @@ function syncMonth(
 
   if (!existingHeaders.includes(CONFIG.ID_COLUMN)) {
     throw new Error(
-      \`На листе "\${monthName}" отсутствует колонка "\${CONFIG.ID_COLUMN}".\`
+      `На листе "${monthName}" отсутствует колонка "${CONFIG.ID_COLUMN}".`
     );
   }
 
@@ -518,7 +518,7 @@ function syncMonth(
           const currentRow = firstNewRow + index;
 
           return [
-            \`=IFERROR(VLOOKUP(\${categoryColumn}\${currentRow};'\${CONFIG.REFERENCE_SHEET}'!A:B;2;FALSE);"Не размечено")\`
+            `=IFERROR(VLOOKUP(${categoryColumn}${currentRow};'${CONFIG.REFERENCE_SHEET}'!A:B;2;FALSE);"Не размечено")`
           ];
         }
       );
@@ -1296,7 +1296,7 @@ function archiveParseSheetMonth_(sheetName) {
 
 
 function archiveGetMonth_(monthKey) {
-  if (!/^\\d{4}-\\d{2}$/.test(monthKey)) {
+  if (!/^\d{4}-\d{2}$/.test(monthKey)) {
     throw new Error("Некорректный месяц архива.");
   }
 
@@ -1363,7 +1363,7 @@ function archiveUpload_(request) {
   const month = String(request.month || "");
   const envelope = request.envelope;
 
-  if (!/^\\d{4}-\\d{2}$/.test(month)) {
+  if (!/^\d{4}-\d{2}$/.test(month)) {
     throw new Error("Некорректный месяц архива.");
   }
 
