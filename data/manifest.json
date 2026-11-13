@@ -305,8 +305,9 @@
       "iterations": 600000,
       "salt": "2keXOSzyrE8d6GNpH9PTvg==",
       "iv": "Ypmwc9ZLLcqzBpzt",
-      "status": "uploaded",
-      "uploadedAt": "2026-11-13T06:04:20.774Z"
+      "status": "verified",
+      "uploadedAt": "2026-11-13T06:04:20.774Z",
+      "verifiedAt": "2026-11-13T06:04:26.016Z"
     }
   ]
 }
