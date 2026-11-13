@@ -9,11 +9,11 @@
       "algorithm": "AES-GCM",
       "kdf": "PBKDF2-SHA-256",
       "iterations": 600000,
-      "salt": "z9iKavnvTOwKGPpGF27QtA==",
-      "iv": "Ei6ErhFQqar5lVHB",
+      "salt": "H54LKo6/4n64AIrDRUnxOw==",
+      "iv": "oH8wEkcPojnl9xtI",
       "status": "uploaded",
-      "backupPath": "data/backups/pw-2ce0f3cfc202628bfd20598becb886c42aa5/2024-11.json.enc",
-      "uploadedAt": "2026-11-13T06:33:22.512Z"
+      "backupPath": "data/backups/pw-e9ddb1db5fe4003d5500ce02a7a6de8e670b/2024-11.json.enc",
+      "uploadedAt": "2026-11-13T06:36:16.137Z"
     },
     {
       "month": "2024-12",
