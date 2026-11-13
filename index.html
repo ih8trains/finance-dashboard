@@ -340,7 +340,25 @@ async function runArchivePasswordMigration() {
   }
 }
 
+async function archiveRetryRequest_(request, stage, attempts = 3) {
+  let lastError;
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      return await request();
+    } catch (error) {
+      lastError = error;
+      const message = String(error && error.message || error);
+      if (attempt === attempts || !/failed to fetch|networkerror|load failed/i.test(message)) {
+        throw new Error(stage + ": " + message);
+      }
+      await new Promise(resolve => setTimeout(resolve, attempt * 1200));
+    }
+  }
+  throw lastError;
+}
+
 async function runArchiveRebuild() {
+  let currentStage = "подготовка";
   const passphrase = password;
   const button = $("archiveMigrateButton");
 
@@ -360,9 +378,10 @@ async function runArchiveRebuild() {
   try {
     archiveStatus("Собираю полный список месячных листов Google Sheets…");
 
-    const candidateResult = await api({
+    currentStage = "получение списка месячных листов";
+    const candidateResult = await archiveRetryRequest_(() => api({
       action: "archive_rebuild_list"
-    });
+    }), currentStage);
 
     const candidates = Array.isArray(candidateResult.candidates)
       ? candidateResult.candidates
@@ -399,10 +418,11 @@ async function runArchiveRebuild() {
         " Готово: " + completed + " из " + candidates.length + "."
       );
 
-      const source = await api({
+      currentStage = "чтение Google Sheets за " + candidate.month;
+      const source = await archiveRetryRequest_(() => api({
         action: "archive_get_month_source",
         month: monthKey
-      });
+      }), currentStage);
 
       const payload = source.payload;
       if (
@@ -452,23 +472,29 @@ async function runArchiveRebuild() {
       };
 
       const backupId = "rebuild-" + Date.now() + "-" + monthKey;
-      const backup = await api({
+      currentStage = "создание резервной копии " + candidate.month;
+      const backup = await archiveRetryRequest_(() => api({
         action: "archive_backup",
         month: monthKey,
         backupId: backupId
-      });
+      }), currentStage);
 
-      const uploaded = await api({
+      currentStage = "загрузка архива " + candidate.month;
+      const uploaded = await archiveRetryRequest_(() => api({
         action: "archive_upload",
         month: monthKey,
         envelope: envelope,
         backupId: backupId
-      });
+      }), currentStage);
 
       const downloadUrl = uploaded.archiveUrl +
         "?verify=" + encodeURIComponent(String(Date.now()));
 
-      const response = await fetch(downloadUrl, { cache: "no-store" });
+      currentStage = "скачивание архива " + candidate.month + " для проверки";
+      const response = await archiveRetryRequest_(
+        () => fetch(downloadUrl, { cache: "no-store" }),
+        currentStage
+      );
       if (!response.ok) {
         throw new Error("Не удалось скачать архив " + candidate.month + " после загрузки. HTTP " + response.status);
       }
@@ -510,12 +536,13 @@ async function runArchiveRebuild() {
         throw new Error("Количество или месяц после расшифровки " + candidate.month + " не совпали.");
       }
 
-      await api({
+      currentStage = "фиксация verified для " + candidate.month;
+      await archiveRetryRequest_(() => api({
         action: "archive_mark_verified",
         month: monthKey,
         sha256: verifiedHash,
         count: restored.rows.length
-      });
+      }), currentStage);
 
       completed++;
 
@@ -534,7 +561,7 @@ async function runArchiveRebuild() {
     );
 
   } catch (error) {
-    archiveStatus("Остановлено: " + (error.message || String(error)) +
+    archiveStatus("Остановлено на этапе «" + currentStage + "»: " + (error.message || String(error)) +
       ". Данные Google Sheets не изменялись; ранее заменённые архивы имеют резервные копии.");
   } finally {
     button.disabled = false;
