@@ -1294,7 +1294,7 @@ function archiveBackupMonth_(request) {
   const month = String(request.month || "");
   const backupId = String(request.backupId || "");
 
-  if (!/^\\d{4}-\\d{2}$/.test(month)) {
+  if (!/^\d{4}-\d{2}$/.test(month)) {
     throw new Error("Некорректный месяц резервной копии.");
   }
 
