@@ -1103,3 +1103,523 @@ function deleteDashboardRule(id) {
     deleted: idx >= 0
   };
 }
+
+
+// =====================================================
+// ЗАЩИЩЁННОЕ АРХИВИРОВАНИЕ В GITHUB
+// Первый этап: выгрузка, шифрование в браузере,
+// загрузка и проверка. Удаления из Sheets здесь нет.
+// =====================================================
+
+const ARCHIVE_CONFIG_ = {
+  REPOSITORY: "ih8trains/finance-dashboard",
+  BRANCH: "main",
+  MANIFEST_PATH: "data/manifest.json",
+  ARCHIVE_FOLDER: "data",
+  ROLLING_DAYS: 30,
+  STATEMENT_DAY: 19
+};
+
+
+function handleArchiveAction_(request) {
+  const action = String(request.action || "");
+
+  if (action === "archive_list_candidates") {
+    return archiveListCandidates_();
+  }
+
+  if (action === "archive_get_month") {
+    return archiveGetMonth_(String(request.month || ""));
+  }
+
+  if (action === "archive_upload") {
+    return archiveUpload_(request);
+  }
+
+  if (action === "archive_mark_verified") {
+    return archiveMarkVerified_(request);
+  }
+
+  if (action === "archive_get_manifest") {
+    return {
+      status: "success",
+      manifest: archiveReadManifest_()
+    };
+  }
+
+  throw new Error("Неизвестная команда архивирования: " + action);
+}
+
+
+function archiveListCandidates_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheets = ss.getSheets();
+  const now = new Date();
+  const cutoff = new Date(now.getTime());
+  cutoff.setDate(cutoff.getDate() - ARCHIVE_CONFIG_.ROLLING_DAYS);
+
+  const candidates = [];
+
+  sheets.forEach(sheet => {
+    const sheetName = sheet.getName();
+
+    if (
+      sheetName === CONFIG.REFERENCE_SHEET ||
+      Object.values(META_SHEETS).includes(sheetName)
+    ) {
+      return;
+    }
+
+    const monthInfo = archiveParseSheetMonth_(sheetName);
+    if (!monthInfo) return;
+
+    const monthEnd = new Date(
+      monthInfo.year,
+      monthInfo.monthIndex + 1,
+      0,
+      23, 59, 59
+    );
+
+    const statementDate = new Date(
+      monthInfo.year,
+      monthInfo.monthIndex + 1,
+      ARCHIVE_CONFIG_.STATEMENT_DAY,
+      23, 59, 59
+    );
+
+    // Архивируем только после 19-го числа следующего месяца
+    // и после выхода всего месяца за rolling 30-day window.
+    if (now < statementDate || monthEnd > cutoff) return;
+
+    const lastRow = sheet.getLastRow();
+    const lastColumn = sheet.getLastColumn();
+
+    if (lastRow < 2 || lastColumn < 1) return;
+
+    const headers = sheet
+      .getRange(1, 1, 1, lastColumn)
+      .getValues()[0]
+      .map(value => String(value));
+
+    const idIndex = headers.indexOf(CONFIG.ID_COLUMN);
+    if (idIndex < 0) return;
+
+    const values = sheet
+      .getRange(2, 1, lastRow - 1, lastColumn)
+      .getValues();
+
+    const count = values.filter(row =>
+      String(row[idIndex] || "").trim() !== ""
+    ).length;
+
+    if (count > 0) {
+      candidates.push({
+        month: monthInfo.key,
+        sheetName: sheetName,
+        count: count
+      });
+    }
+  });
+
+  candidates.sort((a, b) => a.month.localeCompare(b.month));
+
+  return {
+    status: "success",
+    cutoff: Utilities.formatDate(
+      cutoff,
+      Session.getScriptTimeZone(),
+      "yyyy-MM-dd"
+    ),
+    candidates: candidates
+  };
+}
+
+
+function archiveParseSheetMonth_(sheetName) {
+  const normalized = String(sheetName || "")
+    .trim()
+    .toLowerCase()
+    .replace(/ё/g, "е");
+
+  const numeric = normalized.match(/^(\\d{4})-(\\d{2})$/);
+
+  if (numeric) {
+    const year = Number(numeric[1]);
+    const monthNumber = Number(numeric[2]);
+
+    if (monthNumber >= 1 && monthNumber <= 12) {
+      return {
+        year: year,
+        monthIndex: monthNumber - 1,
+        key: numeric[1] + "-" + numeric[2]
+      };
+    }
+  }
+
+  const monthNames = {
+    "январь": 0,
+    "февраль": 1,
+    "март": 2,
+    "апрель": 3,
+    "май": 4,
+    "июнь": 5,
+    "июль": 6,
+    "август": 7,
+    "сентябрь": 8,
+    "октябрь": 9,
+    "ноябрь": 10,
+    "декабрь": 11
+  };
+
+  const match = normalized.match(/^([а-я]+)\\s+(\\d{4})$/);
+  if (!match) return null;
+
+  const monthIndex = monthNames[match[1]];
+  const year = Number(match[2]);
+
+  if (monthIndex === undefined || !year) return null;
+
+  return {
+    year: year,
+    monthIndex: monthIndex,
+    key: year + "-" + String(monthIndex + 1).padStart(2, "0")
+  };
+}
+
+
+function archiveGetMonth_(monthKey) {
+  if (!/^\\d{4}-\\d{2}$/.test(monthKey)) {
+    throw new Error("Некорректный месяц архива.");
+  }
+
+  const candidateResult = archiveListCandidates_();
+  const candidate = candidateResult.candidates.find(
+    item => item.month === monthKey
+  );
+
+  if (!candidate) {
+    throw new Error(
+      "Месяц " + monthKey +
+      " пока нельзя архивировать: он не прошёл условия безопасности."
+    );
+  }
+
+  const sheet = SpreadsheetApp
+    .getActiveSpreadsheet()
+    .getSheetByName(candidate.sheetName);
+
+  if (!sheet) {
+    throw new Error("Лист месяца не найден: " + candidate.sheetName);
+  }
+
+  const values = sheet.getDataRange().getValues();
+
+  if (values.length < 2) {
+    throw new Error("В листе нет операций для архивации.");
+  }
+
+  const headers = values[0].map(value => String(value));
+  const idIndex = headers.indexOf(CONFIG.ID_COLUMN);
+
+  if (idIndex < 0) {
+    throw new Error("В листе отсутствует колонка ID операции.");
+  }
+
+  const rows = values.slice(1).filter(row =>
+    String(row[idIndex] || "").trim() !== ""
+  );
+
+  if (rows.length !== candidate.count) {
+    throw new Error(
+      "Количество операций изменилось во время подготовки архива. " +
+      "Повтори получение месяца."
+    );
+  }
+
+  return {
+    status: "success",
+    payload: {
+      schemaVersion: 1,
+      month: monthKey,
+      sheetName: candidate.sheetName,
+      exportedAt: new Date().toISOString(),
+      headers: headers,
+      rows: rows,
+      count: rows.length
+    }
+  };
+}
+
+
+function archiveUpload_(request) {
+  const month = String(request.month || "");
+  const envelope = request.envelope;
+
+  if (!/^\\d{4}-\\d{2}$/.test(month)) {
+    throw new Error("Некорректный месяц архива.");
+  }
+
+  if (
+    !envelope ||
+    envelope.algorithm !== "AES-GCM" ||
+    envelope.kdf !== "PBKDF2-SHA-256" ||
+    !envelope.salt ||
+    !envelope.iv ||
+    !envelope.ciphertext ||
+    !envelope.sha256 ||
+    !Number.isFinite(Number(envelope.count))
+  ) {
+    throw new Error("Некорректный зашифрованный архив.");
+  }
+
+  if (Number(envelope.count) <= 0) {
+    throw new Error("Пустой архив загружать нельзя.");
+  }
+
+  const path = ARCHIVE_CONFIG_.ARCHIVE_FOLDER +
+    "/" + month + ".json.enc";
+
+  const fileContent = JSON.stringify({
+    schemaVersion: 1,
+    month: month,
+    algorithm: envelope.algorithm,
+    kdf: envelope.kdf,
+    iterations: Number(envelope.iterations),
+    salt: String(envelope.salt),
+    iv: String(envelope.iv),
+    sha256: String(envelope.sha256),
+    count: Number(envelope.count),
+    ciphertext: String(envelope.ciphertext)
+  });
+
+  const existing = githubGetFile_(path);
+
+  githubPutFile_(
+    path,
+    fileContent,
+    "Add encrypted finance archive " + month,
+    existing ? existing.sha : null
+  );
+
+  const manifest = archiveReadManifest_();
+  const item = {
+    month: month,
+    path: path,
+    count: Number(envelope.count),
+    sha256: String(envelope.sha256),
+    algorithm: envelope.algorithm,
+    kdf: envelope.kdf,
+    iterations: Number(envelope.iterations),
+    salt: String(envelope.salt),
+    iv: String(envelope.iv),
+    status: "uploaded",
+    uploadedAt: new Date().toISOString()
+  };
+
+  const existingIndex = manifest.archives.findIndex(
+    entry => entry.month === month
+  );
+
+  if (existingIndex >= 0) {
+    manifest.archives[existingIndex] = item;
+  } else {
+    manifest.archives.push(item);
+  }
+
+  manifest.archives.sort((a, b) =>
+    a.month.localeCompare(b.month)
+  );
+
+  githubWriteManifest_(manifest);
+
+  return {
+    status: "success",
+    month: month,
+    path: path,
+    count: item.count,
+    sha256: item.sha256,
+    archiveUrl:
+      "https://raw.githubusercontent.com/" +
+      ARCHIVE_CONFIG_.REPOSITORY + "/" +
+      ARCHIVE_CONFIG_.BRANCH + "/" + path
+  };
+}
+
+
+function archiveMarkVerified_(request) {
+  const month = String(request.month || "");
+  const sha256 = String(request.sha256 || "");
+  const count = Number(request.count);
+
+  const manifest = archiveReadManifest_();
+  const item = manifest.archives.find(
+    entry => entry.month === month
+  );
+
+  if (!item) {
+    throw new Error("Архив месяца не найден в manifest.");
+  }
+
+  if (
+    item.sha256 !== sha256 ||
+    Number(item.count) !== count
+  ) {
+    throw new Error(
+      "Проверка не совпала с метаданными загруженного архива."
+    );
+  }
+
+  item.status = "verified";
+  item.verifiedAt = new Date().toISOString();
+
+  githubWriteManifest_(manifest);
+
+  return {
+    status: "success",
+    month: month,
+    count: count,
+    archiveStatus: "verified"
+  };
+}
+
+
+function archiveReadManifest_() {
+  const file = githubGetFile_(ARCHIVE_CONFIG_.MANIFEST_PATH);
+
+  if (!file) {
+    return {
+      schemaVersion: 1,
+      archives: []
+    };
+  }
+
+  let manifest;
+
+  try {
+    manifest = JSON.parse(file.content);
+  } catch (error) {
+    throw new Error("Файл data/manifest.json содержит некорректный JSON.");
+  }
+
+  if (!Array.isArray(manifest.archives)) {
+    manifest.archives = [];
+  }
+
+  return manifest;
+}
+
+
+function githubGetFile_(path) {
+  const token = PropertiesService
+    .getScriptProperties()
+    .getProperty("GITHUB_TOKEN");
+
+  if (!token) {
+    throw new Error(
+      "Не найден GITHUB_TOKEN в свойствах скрипта."
+    );
+  }
+
+  const url =
+    "https://api.github.com/repos/" +
+    ARCHIVE_CONFIG_.REPOSITORY +
+    "/contents/" +
+    path.split("/").map(encodeURIComponent).join("/") +
+    "?ref=" + encodeURIComponent(ARCHIVE_CONFIG_.BRANCH);
+
+  const response = UrlFetchApp.fetch(url, {
+    method: "get",
+    headers: {
+      Authorization: "Bearer " + token,
+      Accept: "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28"
+    },
+    muteHttpExceptions: true
+  });
+
+  const code = response.getResponseCode();
+
+  if (code === 404) return null;
+
+  if (code < 200 || code >= 300) {
+    throw new Error(
+      "GitHub GET " + path + " вернул HTTP " + code +
+      ": " + response.getContentText().slice(0, 500)
+    );
+  }
+
+  const result = JSON.parse(response.getContentText());
+  const encoded = String(result.content || "").replace(/\\s/g, "");
+  const bytes = Utilities.base64Decode(encoded);
+
+  return {
+    sha: result.sha,
+    content: Utilities.newBlob(bytes).getDataAsString("UTF-8")
+  };
+}
+
+
+function githubPutFile_(path, content, message, sha) {
+  const token = PropertiesService
+    .getScriptProperties()
+    .getProperty("GITHUB_TOKEN");
+
+  if (!token) {
+    throw new Error(
+      "Не найден GITHUB_TOKEN в свойствах скрипта."
+    );
+  }
+
+  const url =
+    "https://api.github.com/repos/" +
+    ARCHIVE_CONFIG_.REPOSITORY +
+    "/contents/" +
+    path.split("/").map(encodeURIComponent).join("/");
+
+  const payload = {
+    message: message,
+    content: Utilities.base64Encode(
+      content,
+      Utilities.Charset.UTF_8
+    ),
+    branch: ARCHIVE_CONFIG_.BRANCH
+  };
+
+  if (sha) payload.sha = sha;
+
+  const response = UrlFetchApp.fetch(url, {
+    method: "put",
+    contentType: "application/json",
+    headers: {
+      Authorization: "Bearer " + token,
+      Accept: "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28"
+    },
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  });
+
+  const code = response.getResponseCode();
+
+  if (code < 200 || code >= 300) {
+    throw new Error(
+      "GitHub PUT " + path + " вернул HTTP " + code +
+      ": " + response.getContentText().slice(0, 700)
+    );
+  }
+
+  return JSON.parse(response.getContentText());
+}
+
+
+function githubWriteManifest_(manifest) {
+  const path = ARCHIVE_CONFIG_.MANIFEST_PATH;
+  const existing = githubGetFile_(path);
+
+  githubPutFile_(
+    path,
+    JSON.stringify(manifest, null, 2),
+    "Update encrypted finance archive manifest",
+    existing ? existing.sha : null
+  );
+}
