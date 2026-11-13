@@ -191,10 +191,12 @@ async function runArchivePasswordMigration() {
   $("archiveStartButton").disabled = true;
   $("archiveMonths").innerHTML = "";
   let completed = 0;
+  let migrationStage = "подготовка";
   const backupId = "pw-" + Array.from(crypto.getRandomValues(new Uint8Array(18)))
     .map(x => x.toString(16).padStart(2, "0")).join("");
 
   try {
+    migrationStage = "загрузка manifest";
     archiveStatus("Получаю manifest и проверяю список архивов…");
     const result = await api({ action: "archive_get_manifest" });
     const archives = result.manifest && Array.isArray(result.manifest.archives)
@@ -213,6 +215,7 @@ async function runArchivePasswordMigration() {
       archiveStatus("Проверяю и перешифровываю " + month + " · " +
         (completed + 1) + " из " + archives.length + "…");
 
+      migrationStage = "скачивание исходного архива " + month;
       const sourceUrl = "https://raw.githubusercontent.com/ih8trains/finance-dashboard/main/" +
         item.path.split("/").map(encodeURIComponent).join("/");
       const sourceResponse = await fetch(sourceUrl + "?v=" + Date.now(), { cache: "no-store" });
@@ -227,6 +230,7 @@ async function runArchivePasswordMigration() {
 
       let plaintextBuffer;
       let alreadyUsingCurrentPassword = false;
+      migrationStage = "расшифровка исходного архива " + month;
       try {
         const currentKey = await archiveDeriveKey(password,
           archiveBase64ToBytes(envelope.salt), ["decrypt"], Number(envelope.iterations));
@@ -248,6 +252,7 @@ async function runArchivePasswordMigration() {
         }
       }
 
+      migrationStage = "проверка исходного содержимого " + month;
       const plaintext = new Uint8Array(plaintextBuffer);
       const oldHash = await archiveSha256(plaintext);
       if (oldHash !== envelope.sha256) throw new Error("SHA-256 исходного архива " + month + " не совпал.");
@@ -270,12 +275,14 @@ async function runArchivePasswordMigration() {
       }
 
       // Резервная копия исходного зашифрованного файла обязательна до его замены.
+      migrationStage = "создание резервной копии " + month;
       const backup = await api({ action: "archive_backup", month, backupId });
       if (backup.status !== "success" || backup.month !== month ||
           Number(backup.count) !== payload.rows.length) {
         throw new Error("Не удалось подтвердить резервную копию " + month + ". Исходный архив не заменён.");
       }
 
+      migrationStage = "шифрование новым паролем " + month;
       const newSalt = crypto.getRandomValues(new Uint8Array(16));
       const newIv = crypto.getRandomValues(new Uint8Array(12));
       const newKey = await archiveDeriveKey(password, newSalt, ["encrypt"], Number(envelope.iterations));
@@ -288,14 +295,17 @@ async function runArchivePasswordMigration() {
         ciphertext: archiveBytesToBase64(new Uint8Array(encrypted))
       };
 
+      migrationStage = "загрузка нового архива " + month;
       const uploaded = await api({ action: "archive_upload", month, envelope: newEnvelope, backupId });
       if (!uploaded.archiveUrl) throw new Error("Сервер не вернул ссылку на новый архив " + month + ".");
+      migrationStage = "повторное скачивание нового архива " + month;
       const checkResponse = await fetch(uploaded.archiveUrl + "?verify=" + Date.now(), { cache: "no-store" });
       if (!checkResponse.ok) throw new Error("Не удалось скачать новый архив " + month + " для проверки.");
       const checked = await checkResponse.json();
       if (checked.month !== month || checked.sha256 !== oldHash ||
           Number(checked.count) !== payload.rows.length) throw new Error("Метаданные нового архива " + month + " не совпали.");
 
+      migrationStage = "контрольная расшифровка нового архива " + month;
       const checkKey = await archiveDeriveKey(password,
         archiveBase64ToBytes(checked.salt), ["decrypt"], Number(checked.iterations));
       const checkBuffer = await crypto.subtle.decrypt(
@@ -308,6 +318,7 @@ async function runArchivePasswordMigration() {
       if (checkPayload.month !== month || !Array.isArray(checkPayload.rows) ||
           checkPayload.rows.length !== payload.rows.length) throw new Error("Новый архив " + month + " не прошёл проверку содержимого.");
 
+      migrationStage = "фиксация статуса verified для " + month;
       await api({ action: "archive_mark_verified", month, sha256: oldHash, count: checkPayload.rows.length });
       completed++;
       const line = document.createElement("div");
@@ -319,8 +330,9 @@ async function runArchivePasswordMigration() {
     archiveStatus("Готово: " + completed + " из " + archives.length +
       " архивов перешифрованы и проверены новым паролем. Резервные копии исходных файлов сохранены в GitHub. Google Sheets не изменялись.");
   } catch (error) {
-    archiveStatus("Остановлено после " + completed + " архивов: " +
-      (error.message || String(error)) +
+    console.error("[Archive migration]", migrationStage, error);
+    archiveStatus("Остановлено после " + completed + " архивов на этапе «" + migrationStage + "»: " +
+      (error.name ? error.name + ": " : "") + (error.message || String(error)) +
       ". Уже заменённые месяцы имеют резервные копии; остальные исходные архивы не тронуты.");
   } finally {
     button.disabled = false;
