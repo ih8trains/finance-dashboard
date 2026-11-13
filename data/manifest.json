@@ -266,9 +266,10 @@
       "iterations": 600000,
       "salt": "/hXA97k6tY7RAtp6wfMznw==",
       "iv": "/ziZFs7/EbRF00qZ",
-      "status": "uploaded",
+      "status": "verified",
       "backupPath": "data/backups/rebuild-1794552707287-2026-04/2026-04.json.enc",
-      "uploadedAt": "2026-11-13T06:51:58.958Z"
+      "uploadedAt": "2026-11-13T06:51:58.958Z",
+      "verifiedAt": "2026-11-13T06:52:04.057Z"
     },
     {
       "month": "2026-05",
