@@ -1241,7 +1241,7 @@ function archiveParseSheetMonth_(sheetName) {
     .toLowerCase()
     .replace(/ё/g, "е");
 
-  const numeric = normalized.match(/^(\\d{4})-(\\d{2})$/);
+  const numeric = normalized.match(/^(\d{4})-(\d{2})$/);
 
   if (numeric) {
     const year = Number(numeric[1]);
@@ -1271,7 +1271,7 @@ function archiveParseSheetMonth_(sheetName) {
     "декабрь": 11
   };
 
-  const match = normalized.match(/^([а-я]+)\\s+(\\d{4})$/);
+  const match = normalized.match(/^([а-я]+)\s+(\d{4})$/);
   if (!match) return null;
 
   const monthIndex = monthNames[match[1]];
@@ -1549,7 +1549,7 @@ function githubGetFile_(path) {
   }
 
   const result = JSON.parse(response.getContentText());
-  const encoded = String(result.content || "").replace(/\\s/g, "");
+  const encoded = String(result.content || "").replace(/\s/g, "");
   const bytes = Utilities.base64Decode(encoded);
 
   return {
