@@ -255,6 +255,49 @@ th{background:#202225;color:#aeb1b7}
  #page-overview .section-head{margin:22px 0 10px}
 }
 
+
+/* Tables and compact lists — refined graphite surfaces */
+.table-card,.card.table-card{overflow:hidden;border:1px solid #ffffff12}
+.table-head{padding:16px 19px;background:linear-gradient(180deg,#ffffff04,transparent);border-bottom:1px solid #ffffff10}
+.table-scroll{scrollbar-width:thin;scrollbar-color:#45484e transparent}
+.table-scroll::-webkit-scrollbar{height:7px;width:7px}
+.table-scroll::-webkit-scrollbar-thumb{background:#45484e;border-radius:8px}
+table{border-collapse:separate;border-spacing:0}
+th{position:sticky;top:0;z-index:2;background:#202225;color:#999da4;font-size:9px;font-weight:650;letter-spacing:.85px;padding:12px 14px;border-bottom:1px solid #ffffff12}
+td{padding:13px 14px;border-top:0;border-bottom:1px solid #ffffff0a;color:#d5d6d9;transition:background .16s}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:#ffffff06}
+tbody tr:hover td{background:transparent}
+.op-title{font-size:12px;font-weight:620;letter-spacing:-.1px;color:#ededee}
+.op-sub{font-size:10px;color:#858990;line-height:1.4}
+.merchant{gap:10px}
+.merchant-icon{border-radius:10px;box-shadow:0 2px 7px #0002}
+.metric-row{align-items:center;padding:9px 0;margin:0;border-bottom:1px solid #ffffff0a;color:#bfc1c5;line-height:1.4}
+.metric-row:last-child{border-bottom:0}
+.metric-row>b{font-size:12px;color:#ededee;font-weight:650;font-variant-numeric:tabular-nums}
+.recommendation{border-bottom:1px solid #ffffff0a}
+.recommendation:last-child{border-bottom:0}
+.recommendation h3{font-size:12px;letter-spacing:-.15px;color:#e4e4e6}
+.recommendation p{font-size:11px;line-height:1.55;color:#a2a4a9}
+.table-foot{background:#ffffff02;border-top:1px solid #ffffff0b}
+.pager button{min-width:32px;height:30px;border-radius:9px;transition:background .16s,border-color .16s}
+.pager button:hover{background:#ffffff12;border-color:#ffffff30}
+@media(max-width:600px){
+ .table-card,.card.table-card{border-radius:15px}
+ .table-head{padding:13px 14px}
+ .table-scroll{overflow:visible}
+ table,tbody,tr,td{width:100%}
+ tbody tr{margin:7px 0;padding:10px 12px;border:1px solid #ffffff10;border-radius:13px;background:linear-gradient(145deg,#ffffff05,#ffffff02)}
+ tbody tr+tr{margin-top:8px}
+ td{padding:4px 1px;border:0;font-size:11px;line-height:1.45}
+ td:first-child{padding-top:2px}
+ td:last-child{padding-bottom:2px}
+ .op-title{font-size:12px}
+ .op-sub{font-size:10px}
+ .metric-row{padding:10px 0}
+ .recommendation{padding:12px 0}
+ .table-foot{padding:10px 12px}
+}
 </style></head><body>
 <section class="login" id="loginView"><div class="login-card"><h1>Финансовая система</h1><p>Личная аналитика и управление бюджетом</p><form id="loginForm"><input class="field" id="passwordInput" type="password" placeholder="Пароль доступа" autocomplete="current-password" required><button class="primary" id="loginButton">Войти</button></form><div class="error" id="loginError"></div></div></section>
 <div class="layout hidden" id="appView"><aside class="sidebar"><div class="brand"><div><strong>FINANCE / OS</strong><small>PERSONAL CONTROL</small></div></div><div class="nav-label">Управление</div><nav class="nav" id="mainNav"><button class="active" data-page="overview"><span class="nav-ico">◫</span><span>Обзор</span></button><button data-page="income"><span class="nav-ico">↗</span><span>Доходы</span></button><button data-page="expenses"><span class="nav-ico">↘</span><span>Расходы</span></button><button data-page="budget"><span class="nav-ico">▤</span><span>Бюджет и цели</span></button><button data-page="optimize"><span class="nav-ico">⌁</span><span>Оптимизация</span></button><button data-page="operations"><span class="nav-ico">☷</span><span>Операции</span></button><div class="nav-label">Аналитика</div><button data-page="merchants"><span class="nav-ico">▦</span><span>Магазины</span></button><button data-page="subscriptions"><span class="nav-ico">⟳</span><span>Подписки</span></button><button data-page="calendar"><span class="nav-ico">▦</span><span>Календарь</span></button><button data-page="analytics"><span class="nav-ico">⌗</span><span>Аналитика</span></button><div class="nav-label">Настройки</div><button data-page="tags"><span class="nav-ico">◇</span><span>Категории и теги</span></button><button data-page="rules"><span class="nav-ico">⚙</span><span>Автоправила</span></button><button data-page="settings"><span class="nav-ico">☰</span><span>Настройки</span></button></nav><div class="sidebar-bottom">Банковские операции из GitHub<br>Разметка хранится в GitHub</div></aside>
