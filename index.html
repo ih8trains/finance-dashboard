@@ -30,15 +30,15 @@
 <section class="page" id="page-tags"><div class="grid cols-even"><article class="card"><div class="card-head"><div><h2>Категории и теги</h2><div class="card-desc">Категория отвечает «что куплено», тег — «какой контекст»</div></div></div><div id="tagStats"></div></article><article class="card"><div class="card-head"><div><h2>Быстрая разметка</h2><div class="card-desc">Открой операцию в журнале и назначь несколько тегов</div></div></div><div class="notice">Примеры тегов: личное, для_Михаила, работа, возместить, подписка, обязательное, импульсивная_покупка, подарок, здоровье, дом, оптимизировать.</div><button class="btn" data-goto="operations">Перейти к операциям</button></article></div></section>
 <section class="page" id="page-rules"><div class="grid cols-2"><article class="card"><div class="card-head"><div><h2>Новое правило</h2><div class="card-desc">Автоматически предлагать разметку для похожих операций</div></div></div><div class="form-grid"><div class="form-item"><label>Искать в поле</label><select class="field" id="ruleField"><option value="merchant">Магазин / бренд</option><option value="description">Описание</option><option value="source">Источник дохода</option><option value="category">Категория банка</option></select></div><div class="form-item"><label>Содержит текст</label><input class="field" id="ruleMatch" placeholder="Например, Михаил"></div><div class="form-item"><label>Назначить категорию</label><input class="field" id="ruleCategory" placeholder="Дополнительный заработок"></div><div class="form-item"><label>Контекст</label><select class="field" id="ruleScope"><option value="">Не менять</option><option value="personal">Личное</option><option value="transit">За другого</option><option value="work">Рабочее</option><option value="shared">Совместное</option></select></div><div class="form-item full"><label>Теги через запятую</label><input class="field" id="ruleTags" placeholder="доп_заработок, работа"></div></div><div style="margin-top:14px"><button class="primary" id="saveRule">Создать правило</button></div></article><article class="card"><div class="card-head"><div><h2>Сохранённые правила</h2><div class="card-desc">Правила применяются к данным при загрузке, не меняя исходные банковские поля</div></div></div><div id="rulesList"></div></article></div></section>
 <section class="page" id="page-settings"><div class="grid cols-even"><article class="card"><div class="card-head"><div><h2>Модель учёта</h2><div class="card-desc">Что включается в личный финансовый результат</div></div></div><div class="metric-row"><span>Внутренние переводы <span class="muted">isInner=true</span></span><span class="pill green">Исключены</span></div><div class="metric-row"><span>Переводы от людей</span><span class="pill gold">Доход, если подтверждён</span></div><div class="metric-row"><span>Покупки для других</span><span class="pill blue">Транзит</span></div><div class="metric-row"><span>Возвраты</span><span class="pill">Отдельная корректировка</span></div><div class="metric-row"><span>Кэшбэк и бонусы</span><span class="pill">Не смешиваются</span></div></article><article class="card"><div class="card-head"><div><h2>Данные и безопасность</h2><div class="card-desc">Текущий источник и сохранность разметки</div></div></div><div id="dataDiagnostics"></div><div class="footer-note">Пользовательские теги, категории, бюджеты и правила хранятся в отдельных служебных листах Google Sheets. Незавершённая разметка дополнительно сохраняется в локальном кэше браузера и отправляется повторно после следующего входа. Банковские листы не изменяются.</div><div style="margin-top:14px"><button class="btn danger" id="clearLocal">Очистить локальный кэш</button></div></article><article class="card" style="grid-column:1/-1">
-<div class="card-head"><div><h2>Архивирование операций</h2><div class="card-desc">Закрытые месяцы будут зашифрованы отдельным паролем. В GitHub попадут только зашифрованные файлы — без пароля их содержимое прочитать нельзя. Google Sheets на этом этапе не очищается.</div></div></div>
-<div class="form-grid">
-<div class="form-item"><label>Отдельный пароль архива</label><input class="field" id="archivePassword" type="password" autocomplete="new-password" placeholder="Придумай отдельный пароль"></div>
-<div class="form-item"><label>Проверка и загрузка</label><button class="primary" id="archiveStartButton" type="button">Создать и проверить архивы</button></div>
-</div>
-<div class="footer-note">Используй длинный уникальный пароль и сохрани его в надёжном месте. Он не отправляется в Apps Script и не сохраняется в браузере. Без него восстановить архивы будет невозможно.</div>
-<div id="archiveStatus" class="notice" style="margin-top:14px">Пока архивы не создавались. Сначала проверим доступные закрытые месяцы.</div>
-<div id="archiveMonths" style="margin-top:10px"></div>
-</article>
+<div class="card-head"><div><h2>Архивирование операций</h2><div class="card-desc">Архивы зашифрованы тем же паролем, которым ты входишь в дашборд. Пароль не сохраняется в браузере и не отправляется в GitHub.</div></div></div>
+ <div class="form-grid">
+ <div class="form-item"><label>Новые закрытые месяцы</label><button class="primary" id="archiveStartButton" type="button">Создать и проверить архивы</button></div>
+ <div class="form-item"><label>Смена пароля существующих архивов</label><button class="btn" id="archiveMigrateButton" type="button">Перешифровать 23 архива</button></div>
+ </div>
+ <div class="footer-note">Для смены пароля один раз потребуется старый пароль архивов. Каждый исходный файл сначала копируется в резервную папку GitHub, и только после этого заменяется. Google Sheets не очищается.</div>
+ <div id="archiveStatus" class="notice" style="margin-top:14px">Архивы не изменяются, пока ты не запустишь соответствующую операцию.</div>
+ <div id="archiveMonths" style="margin-top:10px"></div>
+ </article>
 </div></section>
 <div class="footer-note">Финансовые показатели основаны на данных Т‑Банка и пользовательской разметке. Неподтверждённые классификации помечаются как требующие проверки.</div></main></div>
 <div class="modal-backdrop hidden" id="editBackdrop"><div class="modal"><div class="modal-head"><h2>Разметка операции</h2><button class="btn small" id="closeEdit">Закрыть</button></div><div id="editOperationInfo" class="notice"></div><div class="form-grid"><div class="form-item"><label>Пользовательская категория</label><input class="field" id="editCategory" placeholder="Например, Дополнительный заработок"></div><div class="form-item"><label>Тип / роль операции</label><select class="field" id="editRole"><option value="">Авто по банку</option><option value="income">Доход</option><option value="expense">Расход</option><option value="transfer">Перевод</option><option value="refund">Возврат</option><option value="fee">Комиссия</option></select></div><div class="form-item"><label>Контекст расходов</label><select class="field" id="editScope"><option value="personal">Личное</option><option value="transit">За другого / транзит</option><option value="work">Рабочее</option><option value="shared">Совместное</option><option value="unknown">Не определено</option></select></div><div class="form-item"><label>Связанный человек</label><input class="field" id="editPerson" placeholder="Например, Михаил"></div><div class="form-item"><label>Проект</label><input class="field" id="editProject" placeholder="Название проекта"></div><div class="form-item"><label>Ожидается возмещение</label><select class="field" id="editReimbursable"><option value="false">Нет</option><option value="true">Да</option></select></div><div class="form-item"><label>Уже возмещено, ₽</label><input class="field" id="editReimbursed" type="number" min="0"></div><div class="form-item full"><label>Теги через запятую</label><input class="field" id="editTags" placeholder="личное, дом, оптимизировать"></div><div class="form-item full"><label>Комментарий</label><textarea class="field" id="editComment" placeholder="Зачем была операция, что важно помнить…"></textarea></div></div><div class="modal-foot"><button class="btn" id="cancelEdit">Отмена</button><button class="primary" id="saveEdit">Сохранить разметку</button></div></div></div>
@@ -123,7 +123,7 @@ async function archiveSha256(bytes) {
     .join("");
 }
 
-async function archiveDeriveKey(passphrase, salt, usages) {
+async function archiveDeriveKey(passphrase, salt, usages, iterations = ARCHIVE_PBKDF2_ITERATIONS) {
   const material = await crypto.subtle.importKey(
     "raw",
     new TextEncoder().encode(passphrase),
@@ -136,7 +136,7 @@ async function archiveDeriveKey(passphrase, salt, usages) {
     {
       name: "PBKDF2",
       salt: salt,
-      iterations: ARCHIVE_PBKDF2_ITERATIONS,
+      iterations: Number(iterations) || ARCHIVE_PBKDF2_ITERATIONS,
       hash: "SHA-256"
     },
     material,
@@ -169,12 +169,148 @@ function archiveCanonicalMonth_(value) {
   return match[2] + "-" + names[match[1]];
 }
 
+
+async function runArchivePasswordMigration() {
+  const oldPassphrase = prompt("Введи старый пароль, которым сейчас зашифрованы архивы. Он будет использован только в памяти этой вкладки.");
+  if (oldPassphrase === null) return;
+  if (!oldPassphrase) {
+    alert("Старый пароль не может быть пустым.");
+    return;
+  }
+  if (!password) {
+    alert("Сессия дашборда завершена. Войди заново.");
+    return;
+  }
+  if (!window.crypto || !crypto.subtle) {
+    alert("Браузер не поддерживает Web Crypto.");
+    return;
+  }
+
+  const button = $("archiveMigrateButton");
+  button.disabled = true;
+  $("archiveStartButton").disabled = true;
+  $("archiveMonths").innerHTML = "";
+  let completed = 0;
+  const backupId = "pw-" + Array.from(crypto.getRandomValues(new Uint8Array(18)))
+    .map(x => x.toString(16).padStart(2, "0")).join("");
+
+  try {
+    archiveStatus("Получаю manifest и проверяю список архивов…");
+    const result = await api({ action: "archive_get_manifest" });
+    const archives = result.manifest && Array.isArray(result.manifest.archives)
+      ? result.manifest.archives.filter(x => x && x.status === "verified")
+      : [];
+    if (!archives.length) throw new Error("В manifest нет архивов со статусом verified. Ничего не изменено.");
+
+    const expectedTotal = archives.reduce((sum, item) => sum + Number(item.count || 0), 0);
+    if (!confirm("Будет перешифровано " + archives.length + " архивов (" +
+      expectedTotal.toLocaleString("ru-RU") + " операций). Для каждого файла сначала создаётся резервная копия. Продолжить?")) return;
+
+    const decoder = new TextDecoder();
+    for (const item of archives) {
+      const month = String(item.month || "");
+      if (!/^\\d{4}-\\d{2}$/.test(month) || !item.path) throw new Error("Некорректная запись архива в manifest.");
+      archiveStatus("Проверяю и перешифровываю " + month + " · " +
+        (completed + 1) + " из " + archives.length + "…");
+
+      const sourceUrl = "https://raw.githubusercontent.com/ih8trains/finance-dashboard/main/" +
+        item.path.split("/").map(encodeURIComponent).join("/");
+      const sourceResponse = await fetch(sourceUrl + "?v=" + Date.now(), { cache: "no-store" });
+      if (!sourceResponse.ok) throw new Error("Не удалось скачать исходный архив " + month + ". HTTP " + sourceResponse.status);
+      const envelope = await sourceResponse.json();
+
+      if (envelope.month !== month || envelope.algorithm !== "AES-GCM" ||
+          envelope.kdf !== "PBKDF2-SHA-256" || Number(envelope.count) !== Number(item.count) ||
+          envelope.sha256 !== item.sha256) {
+        throw new Error("Метаданные архива " + month + " не совпали с manifest.");
+      }
+
+      const oldKey = await archiveDeriveKey(oldPassphrase,
+        archiveBase64ToBytes(envelope.salt), ["decrypt"], Number(envelope.iterations));
+      let plaintextBuffer;
+      try {
+        plaintextBuffer = await crypto.subtle.decrypt(
+          { name: "AES-GCM", iv: archiveBase64ToBytes(envelope.iv) },
+          oldKey, archiveBase64ToBytes(envelope.ciphertext)
+        );
+      } catch (_) {
+        throw new Error("Не удалось расшифровать " + month + ". Проверь старый пароль. Исходный архив не заменён.");
+      }
+
+      const plaintext = new Uint8Array(plaintextBuffer);
+      const oldHash = await archiveSha256(plaintext);
+      if (oldHash !== envelope.sha256) throw new Error("SHA-256 исходного архива " + month + " не совпал.");
+      const payload = JSON.parse(decoder.decode(plaintext));
+      if (payload.month !== month || !Array.isArray(payload.rows) ||
+          payload.rows.length !== Number(envelope.count)) {
+        throw new Error("Содержимое или количество операций в " + month + " не прошло проверку.");
+      }
+
+      // Резервная копия исходного зашифрованного файла обязательна до его замены.
+      const backup = await api({ action: "archive_backup", month, backupId });
+      if (backup.status !== "success" || backup.month !== month ||
+          Number(backup.count) !== payload.rows.length) {
+        throw new Error("Не удалось подтвердить резервную копию " + month + ". Исходный архив не заменён.");
+      }
+
+      const newSalt = crypto.getRandomValues(new Uint8Array(16));
+      const newIv = crypto.getRandomValues(new Uint8Array(12));
+      const newKey = await archiveDeriveKey(password, newSalt, ["encrypt"], Number(envelope.iterations));
+      const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv: newIv }, newKey, plaintext);
+      const newEnvelope = {
+        algorithm: "AES-GCM", kdf: "PBKDF2-SHA-256",
+        iterations: Number(envelope.iterations),
+        salt: archiveBytesToBase64(newSalt), iv: archiveBytesToBase64(newIv),
+        sha256: oldHash, count: payload.rows.length,
+        ciphertext: archiveBytesToBase64(new Uint8Array(encrypted))
+      };
+
+      const uploaded = await api({ action: "archive_upload", month, envelope: newEnvelope, backupId });
+      if (!uploaded.archiveUrl) throw new Error("Сервер не вернул ссылку на новый архив " + month + ".");
+      const checkResponse = await fetch(uploaded.archiveUrl + "?verify=" + Date.now(), { cache: "no-store" });
+      if (!checkResponse.ok) throw new Error("Не удалось скачать новый архив " + month + " для проверки.");
+      const checked = await checkResponse.json();
+      if (checked.month !== month || checked.sha256 !== oldHash ||
+          Number(checked.count) !== payload.rows.length) throw new Error("Метаданные нового архива " + month + " не совпали.");
+
+      const checkKey = await archiveDeriveKey(password,
+        archiveBase64ToBytes(checked.salt), ["decrypt"], Number(checked.iterations));
+      const checkBuffer = await crypto.subtle.decrypt(
+        { name: "AES-GCM", iv: archiveBase64ToBytes(checked.iv) },
+        checkKey, archiveBase64ToBytes(checked.ciphertext)
+      );
+      const checkBytes = new Uint8Array(checkBuffer);
+      if (await archiveSha256(checkBytes) !== oldHash) throw new Error("SHA-256 нового архива " + month + " не совпал.");
+      const checkPayload = JSON.parse(decoder.decode(checkBytes));
+      if (checkPayload.month !== month || !Array.isArray(checkPayload.rows) ||
+          checkPayload.rows.length !== payload.rows.length) throw new Error("Новый архив " + month + " не прошёл проверку содержимого.");
+
+      await api({ action: "archive_mark_verified", month, sha256: oldHash, count: checkPayload.rows.length });
+      completed++;
+      const line = document.createElement("div");
+      line.className = "metric-row";
+      line.textContent = month + " · " + checkPayload.rows.length.toLocaleString("ru-RU") +
+        " операций · резервная копия создана · новый пароль проверен";
+      $("archiveMonths").appendChild(line);
+    }
+    archiveStatus("Готово: " + completed + " из " + archives.length +
+      " архивов перешифрованы и проверены новым паролем. Резервные копии исходных файлов сохранены в GitHub. Google Sheets не изменялись.");
+  } catch (error) {
+    archiveStatus("Остановлено после " + completed + " архивов: " +
+      (error.message || String(error)) +
+      ". Уже заменённые месяцы имеют резервные копии; остальные исходные архивы не тронуты.");
+  } finally {
+    button.disabled = false;
+    $("archiveStartButton").disabled = false;
+  }
+}
+
 async function runArchivePreparation() {
-  const passphrase = $("archivePassword").value;
+  const passphrase = password;
   const button = $("archiveStartButton");
 
-  if (!passphrase || passphrase.length < 12) {
-    alert("Задай отдельный пароль архива длиной не менее 12 символов.");
+  if (!passphrase) {
+    alert("Сначала войди в дашборд.");
     return;
   }
 
@@ -358,7 +494,6 @@ async function runArchivePreparation() {
     archiveStatus("Остановлено: " + (error.message || String(error)) +
       ". Уже проверенные месяцы сохранены; исходные данные в Google Sheets не удалялись.");
   } finally {
-    $("archivePassword").value = "";
     button.disabled = false;
   }
 }
@@ -380,5 +515,5 @@ $('recommendations').addEventListener('click',async e=>{let b=e.target.closest('
 $('bulkTag').addEventListener('click',async()=>{if(!selected.size)return alert('Сначала выбери операции');let t=prompt('Тег для выбранных операций:');if(!t)return;let batch=[...selected].map(id=>{let l={...label({id}),operation_id:id};l.tags=[...new Set([...tagsOf({id}),t.trim()])];return l});batch.forEach(l=>{labels[l.operation_id]=l;pendingLabels[l.operation_id]={...l,_cached_at:Date.now()}});persistPendingLabels();selected.clear();renderAll();await flushPendingLabels()});$('bulkScope').addEventListener('click',async()=>{if(!selected.size)return alert('Сначала выбери операции');let s=prompt('Контекст: personal / transit / work / shared','transit');if(!['personal','transit','work','shared'].includes(s))return;let batch=[...selected].map(id=>({...label({id}),operation_id:id,spending_scope:s}));batch.forEach(l=>{labels[l.operation_id]=l;pendingLabels[l.operation_id]={...l,_cached_at:Date.now()}});persistPendingLabels();selected.clear();renderAll();await flushPendingLabels()});
 $('exportCsv').addEventListener('click',()=>{let rows=[['Дата','ID','Тип','Сумма','Описание','Магазин','Категория банка','Моя категория','Теги','Контекст','Человек','Проект','Комментарий']];visibleOps().forEach(o=>{let l=label(o);rows.push([fmtDate(o.date),o.id,o.type,o.amount,o.description,o.merchant,o.bankCategory,categoryOf(o),tagsOf(o).join('|'),scopeName(scopeOf(o)),l.related_person||'',l.project||'',l.comment||''])});let csv='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='finance-operations.csv';a.click();URL.revokeObjectURL(a.href)});
 $('clearLocal').addEventListener('click',()=>{if(confirm('Очистить локальный кэш браузера? Данные в Google Sheets не удалятся.')){if(Object.keys(pendingLabels).length&&!confirm('Есть несинхронизированные изменения разметки. Удалить их без отправки?'))return;localStorage.removeItem('finance_dashboard_pending_labels_v2');pendingLabels={};persistPendingLabels();alert('Локальный кэш очищен.')}});
-$("archiveStartButton").addEventListener("click", runArchivePreparation);
+$("archiveStartButton").addEventListener("click", runArchivePreparation);\n$("archiveMigrateButton").addEventListener("click", runArchivePasswordMigration);
 </script></body></html>
