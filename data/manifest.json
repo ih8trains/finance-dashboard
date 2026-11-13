@@ -260,16 +260,15 @@
       "month": "2026-04",
       "path": "data/2026-04.json.enc",
       "count": 261,
-      "sha256": "30b6fb606d2725425097618edbcdad7e30abc5842242fdc8e5a540b992b06b04",
+      "sha256": "df30012237ddebdf50c0f7d45312b2c5525ca00d31a4ee3914d8311d2731f6ca",
       "algorithm": "AES-GCM",
       "kdf": "PBKDF2-SHA-256",
       "iterations": 600000,
-      "salt": "/hXA97k6tY7RAtp6wfMznw==",
-      "iv": "/ziZFs7/EbRF00qZ",
-      "status": "verified",
-      "backupPath": "data/backups/rebuild-1794552707287-2026-04/2026-04.json.enc",
-      "uploadedAt": "2026-11-13T06:51:58.958Z",
-      "verifiedAt": "2026-11-13T06:52:04.057Z"
+      "salt": "zpz+0b7afUvaPKuz73okYg==",
+      "iv": "OeIZH1E84a0aiArp",
+      "status": "uploaded",
+      "backupPath": "data/backups/rebuild-1794554562955-2026-04/2026-04.json.enc",
+      "uploadedAt": "2026-11-13T07:22:53.530Z"
     },
     {
       "month": "2026-05",
