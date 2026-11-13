@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>T-Bank Auto Sync</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      padding: 18px;
+      width: 300px;
+      margin: 0;
+      background: #f8fafc;
+      color: #111827;
+    }
+    .header { margin-bottom: 18px; }
+    .title { font-size: 17px; font-weight: 700; margin-bottom: 5px; }
+    .subtitle { font-size: 12px; color: #64748b; }
+    .bank-instruction {
+      margin: 0 0 12px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #64748b;
+    }
+    .bank-instruction a { color: #d71920; font-weight: 600; text-decoration: none; }
+    .bank-instruction a:hover { text-decoration: underline; }
+    button {
+      border: 0;
+      padding: 12px 15px;
+      border-radius: 9px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+    }
+    #syncBtn { background: #ffe600; color: #111827; }
+    #syncBtn:hover:not(:disabled) { background: #ead200; }
+    #syncBtn:disabled { opacity: .6; cursor: wait; }
+    .access { margin-top: 12px; font-size: 11px; color: #64748b; }
+    .access summary { cursor: pointer; user-select: none; }
+    label { display: block; margin: 10px 0 4px; color: #475569; }
+    input {
+      width: 100%; padding: 8px 9px; border: 1px solid #cbd5e1;
+      border-radius: 7px; background: #fff; color: #111827; font: inherit;
+    }
+    .hint { margin-top: 5px; font-size: 10px; line-height: 1.4; color: #94a3b8; }
+    #status {
+      margin-top: 15px; padding: 11px; border-radius: 8px;
+      background: #eef2f7; color: #475569; font-size: 12px;
+      line-height: 1.5; white-space: pre-line; overflow-wrap: anywhere; min-height: 42px;
+    }
+    .progress-wrap {
+      margin-top: 10px; height: 7px; background: #e2e8f0;
+      border-radius: 99px; overflow: hidden; display: none;
+    }
+    #progress { height: 100%; width: 0; background: #16a34a; transition: width .2s ease; }
+    .footer { margin-top: 12px; font-size: 10px; color: #94a3b8; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="title">T-Bank Auto Sync</div>
+    <div class="subtitle">Синхронизация операций · GitHub</div>
+  </div>
+
+  <p class="bank-instruction">
+    Открой сайт
+    <a href="https://www.tbank-online.com/" target="_blank" rel="noopener noreferrer">Т-Банка</a>
+    и авторизуйся.
+  </p>
+
+  <button id="syncBtn">Синхронизировать</button>
+
+  <details class="access">
+    <summary>Доступ к архивам</summary>
+    <label for="password">Пароль архивов</label>
+    <input id="password" type="password" autocomplete="current-password" placeholder="Пароль дашборда">
+    <label for="token">GitHub token</label>
+    <input id="token" type="password" autocomplete="off" placeholder="github_pat_…">
+    <div class="hint">Введённые значения сохраняются локально в профиле Chrome до успешной синхронизации. GitHub token хранится в настройках расширения на этом компьютере; не используй общий профиль браузера.</div>
+  </details>
+
+  <div class="progress-wrap" id="progressWrap"><div id="progress"></div></div>
+  <div id="status">Готов к синхронизации.</div>
+  <div class="footer">Только чтение операций Т-Банка</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
