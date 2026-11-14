@@ -553,15 +553,19 @@ async function prepareForecastHistory(){
  if(status)status.textContent='Использую уже загруженные архивы…';
  if(panel)panel.innerHTML='<div class="empty">Собираю прогноз из уже загруженных данных…</div>';
  try{
-  // Wait for the dashboard's normal current-month / month / quarter / half-year warm-up.
-  // Forecast itself must not fetch any additional archive.
   if(warmupPromise)await warmupPromise;
-  const builtHistory=refreshForecastHistory();
   const currentKey=new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0');
+  const available=archiveManifest?.archives?.filter(x=>x&&x.status==='verified').map(x=>x.month).filter(k=>k<currentKey).sort()||[];
+  const required=available.slice(-12),missing=required.filter(k=>!loadedMonthPayloads.has(k));
+  if(missing.length){
+   if(status)status.textContent='Догружаю историю прогноза: '+(required.length-missing.length)+'/'+required.length+' месяцев…';
+   await loadArchiveData(password,missing);
+  }
+  const builtHistory=refreshForecastHistory();
   const completedMonths=builtHistory.months.filter(k=>k<currentKey).length;
   if(status)status.textContent=completedMonths
    ?'История прогноза: '+completedMonths+' завершённых месяцев'
-   :'Выбери «Месяц», «Квартал» или «Полгода», чтобы загрузить историю';
+   :'Нет завершённых архивов для прогноза';
  }catch(e){
   forecastHistoryError=e.message||'Не удалось подготовить историю прогноза';
   if(status)status.textContent='Не удалось подготовить историю: '+forecastHistoryError;
