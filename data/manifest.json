@@ -12,7 +12,6 @@
       "salt": "hLFN+l+X1piyUS0VhAlFYg==",
       "iv": "JNNl6iT7oKx6o+op",
       "status": "verified",
-      "backupPath": "data/backups/rebuild-1794554170229-2024-11/2024-11.json.enc",
       "uploadedAt": "2026-11-13T07:16:19.682Z",
       "verifiedAt": "2026-11-13T07:16:28.840Z"
     },
@@ -27,7 +26,6 @@
       "salt": "PXMabIhlp9sW/Tykdxf4Dg==",
       "iv": "rPGUWsP6oviY8w6X",
       "status": "verified",
-      "backupPath": "data/backups/rebuild-1794554194538-2024-12/2024-12.json.enc",
       "uploadedAt": "2026-11-13T07:16:49.759Z",
       "verifiedAt": "2026-11-13T07:16:56.439Z"
     },
@@ -42,7 +40,6 @@
       "salt": "kWaGi3oYA/AExWSAWuLqJg==",
       "iv": "Kv4G/F3nO8lv0eBe",
       "status": "verified",
-      "backupPath": "data/backups/rebuild-1794554222182-2025-01/2025-01.json.enc",
       "uploadedAt": "2026-11-13T07:17:17.586Z",
       "verifiedAt": "2026-11-13T07:17:24.336Z"
     },
@@ -57,7 +54,6 @@
       "salt": "R+qJzXHrvwv6F+fj31ToaA==",
       "iv": "bGmXyjy2Gxpg27kp",
       "status": "verified",
-      "backupPath": "data/backups/rebuild-1794554251668-2025-02/2025-02.json.enc",
       "uploadedAt": "2026-11-13T07:17:43.253Z",
       "verifiedAt": "2026-11-13T07:17:49.220Z"
     },
@@ -72,7 +68,6 @@
       "salt": "lJ7upGPSBBNf+g7zGvw2LA==",
       "iv": "OYvOj8MXkykSSG2j",
       "status": "verified",
-      "backupPath": "data/backups/rebuild-1794554275737-2025-03/2025-03.json.enc",
       "uploadedAt": "2026-11-13T07:18:06.916Z",
       "verifiedAt": "2026-11-13T07:18:11.906Z"
     },
@@ -87,7 +82,6 @@
       "salt": "6P5fDaZcUDMMUWdkKIcveQ==",
       "iv": "r6oCV+BnUiiQ6YV/",
       "status": "verified",
-      "backupPath": "data/backups/rebuild-1794554297292-2025-04/2025-04.json.enc",
       "uploadedAt": "2026-11-13T07:18:30.313Z",
       "verifiedAt": "2026-11-13T07:18:36.290Z"
     },
@@ -102,7 +96,6 @@
       "salt": "e+dWRToIYaFHxBkw6arhtg==",
       "iv": "KPes4y35/izJQym5",
       "status": "verified",
-      "backupPath": "data/backups/rebuild-1794554320851-2025-05/2025-05.json.enc",
       "uploadedAt": "2026-11-13T07:18:51.966Z",
       "verifiedAt": "2026-11-13T07:18:56.750Z"
     },
@@ -117,7 +110,6 @@
       "salt": "ttd/a6nrjAE920NReEMjqw==",
       "iv": "BdXn1xh0Nmtatnuo",
       "status": "verified",
-      "backupPath": "data/backups/rebuild-1794554341863-2025-06/2025-06.json.enc",
       "uploadedAt": "2026-11-13T07:19:15.435Z",
       "verifiedAt": "2026-11-13T07:19:20.920Z"
     },
@@ -132,7 +124,6 @@
       "salt": "jBAtTplO4xXdyutMxJiSWw==",
       "iv": "8AA4Bi0cH8Yg7Bmq",
       "status": "verified",
-      "backupPath": "data/backups/rebuild-1794554365382-2025-07/2025-07.json.enc",
       "uploadedAt": "2026-11-13T07:19:37.621Z",
       "verifiedAt": "2026-11-13T07:19:42.512Z"
     },
@@ -147,7 +138,6 @@
       "salt": "sBPnpTiVCrYgrZQM7Ql+9A==",
       "iv": "Ge+WhGuAn4MFX8VA",
       "status": "verified",
-      "backupPath": "data/backups/rebuild-1794554387769-2025-08/2025-08.json.enc",
       "uploadedAt": "2026-11-13T07:19:58.760Z",
       "verifiedAt": "2026-11-13T07:20:03.204Z"
     },
@@ -162,7 +152,6 @@
       "salt": "2NYOi5ePmdIGL5u0h5v59g==",
       "iv": "HEE/bMjjjeDRP+pI",
       "status": "verified",
-      "backupPath": "data/backups/rebuild-1794554409123-2025-09/2025-09.json.enc",
       "uploadedAt": "2026-11-13T07:20:21.478Z",
       "verifiedAt": "2026-11-13T07:20:26.867Z"
     },
@@ -177,7 +166,6 @@
       "salt": "dH0u6uYhQFzveAXp/Et9tw==",
       "iv": "XPheSuWX0/4EAXsb",
       "status": "verified",
-      "backupPath": "data/backups/rebuild-1794554431725-2025-10/2025-10.json.enc",
       "uploadedAt": "2026-11-13T07:20:42.820Z",
       "verifiedAt": "2026-11-13T07:20:48.040Z"
     },
@@ -192,7 +180,6 @@
       "salt": "Q6/qP0FjGnfb3PdEwgmAxw==",
       "iv": "dK3nIWYEe2DDraMD",
       "status": "verified",
-      "backupPath": "data/backups/rebuild-1794554453286-2025-11/2025-11.json.enc",
       "uploadedAt": "2026-11-13T07:21:05.747Z",
       "verifiedAt": "2026-11-13T07:21:10.734Z"
     },
@@ -207,7 +194,6 @@
       "salt": "ayK2+QWoGLJ1995A71dtdw==",
       "iv": "K66UjHpB/oV0AXd3",
       "status": "verified",
-      "backupPath": "data/backups/rebuild-1794554476255-2025-12/2025-12.json.enc",
       "uploadedAt": "2026-11-13T07:21:27.563Z",
       "verifiedAt": "2026-11-13T07:21:32.612Z"
     },
@@ -222,7 +208,6 @@
       "salt": "fl0Zpa9f9ack406CaTQ2TA==",
       "iv": "+j1n1YzYVqH2f4Ty",
       "status": "verified",
-      "backupPath": "data/backups/rebuild-1794554497334-2026-01/2026-01.json.enc",
       "uploadedAt": "2026-11-13T07:21:51.796Z",
       "verifiedAt": "2026-11-13T07:21:56.487Z"
     },
@@ -237,7 +222,6 @@
       "salt": "Xh6CxeZvg7LOLVVWZq1bjQ==",
       "iv": "ACyXdcTQMNHxedjx",
       "status": "verified",
-      "backupPath": "data/backups/rebuild-1794554520936-2026-02/2026-02.json.enc",
       "uploadedAt": "2026-11-13T07:22:11.351Z",
       "verifiedAt": "2026-11-13T07:22:16.298Z"
     },
@@ -252,7 +236,6 @@
       "salt": "5O2Obz7MKAdRucFD+xeOyA==",
       "iv": "Zjoz1S+5BA5dXDZP",
       "status": "verified",
-      "backupPath": "data/backups/rebuild-1794554541361-2026-03/2026-03.json.enc",
       "uploadedAt": "2026-11-13T07:22:32.838Z",
       "verifiedAt": "2026-11-13T07:22:37.900Z"
     },
@@ -267,7 +250,6 @@
       "salt": "zpz+0b7afUvaPKuz73okYg==",
       "iv": "OeIZH1E84a0aiArp",
       "status": "verified",
-      "backupPath": "data/backups/rebuild-1794554562955-2026-04/2026-04.json.enc",
       "uploadedAt": "2026-11-13T07:22:53.530Z",
       "verifiedAt": "2026-11-13T07:22:58.984Z"
     },
@@ -282,7 +264,6 @@
       "salt": "OXQsU9eaiRx8zpqrLqvPwA==",
       "iv": "x/MTtzJcyPfIMwzG",
       "status": "verified",
-      "backupPath": "data/backups/rebuild-1794554585215-2026-05/2026-05.json.enc",
       "uploadedAt": "2026-11-13T07:23:18.394Z",
       "verifiedAt": "2026-11-13T07:23:23.658Z"
     },
@@ -297,7 +278,6 @@
       "salt": "h528qIBB/wdAwIKJhd0vjw==",
       "iv": "eGwJ2OkZeqZs1N/g",
       "status": "verified",
-      "backupPath": "data/backups/rebuild-1794554610155-2026-06/2026-06.json.enc",
       "uploadedAt": "2026-11-13T07:23:42.629Z",
       "verifiedAt": "2026-11-13T07:23:48.288Z"
     },
@@ -312,7 +292,6 @@
       "salt": "DGmqEDNiGXZWv0Z9RNSkEg==",
       "iv": "l4aoNlr7EtdJWe7Z",
       "status": "verified",
-      "backupPath": "data/backups/rebuild-1794554634070-2026-07/2026-07.json.enc",
       "uploadedAt": "2026-11-13T07:24:08.148Z",
       "verifiedAt": "2026-11-13T07:24:14.101Z"
     },
@@ -327,7 +306,6 @@
       "salt": "1BVkXDo0ENfyzmdsG+z1IQ==",
       "iv": "U0oG7egrzwORyiUd",
       "status": "verified",
-      "backupPath": "data/backups/rebuild-1794554659816-2026-08/2026-08.json.enc",
       "uploadedAt": "2026-11-13T07:24:32.834Z",
       "verifiedAt": "2026-11-13T07:24:38.056Z"
     },
@@ -342,7 +320,6 @@
       "salt": "rycNMbJr70LEcBMvezwvwg==",
       "iv": "luM6qvc4uPGD/6uq",
       "status": "verified",
-      "backupPath": "data/backups/rebuild-1794554683386-2026-09/2026-09.json.enc",
       "uploadedAt": "2026-11-13T07:24:53.212Z",
       "verifiedAt": "2026-11-13T07:24:57.967Z"
     },
@@ -357,7 +334,6 @@
       "salt": "q+SgD/rr0O7bhv689FbaWA==",
       "iv": "eJTaY3KW6eHam66Z",
       "status": "verified",
-      "backupPath": "data/backups/sync-1794562821500-2026-10/2026-10.json.enc",
       "uploadedAt": "2026-11-13T09:40:37.252Z",
       "verifiedAt": "2026-11-13T09:40:37.252Z"
     },
@@ -372,7 +348,6 @@
       "salt": "BMjwd3Gd4rI/CyRJ+t/MvA==",
       "iv": "rck775/U9LJFN98W",
       "status": "verified",
-      "backupPath": "data/backups/sync-1794639521395-2026-11/2026-11.json.enc",
       "uploadedAt": "2026-11-14T06:58:49.149Z",
       "verifiedAt": "2026-11-14T06:58:49.150Z"
     }
