@@ -550,7 +550,6 @@ async function prepareForecastHistory(){
  }finally{
   forecastHistoryLoading=false;
   renderMonthForecast();renderForecastBacktestUnsafe();
-  if(activePage==='income')renderIncomeBacktestUnsafe?.();
  }
 }
 function refreshForecastHistory(){
