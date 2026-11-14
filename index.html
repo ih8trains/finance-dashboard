@@ -521,18 +521,25 @@ async function prepareForecastHistory(){
  if(forecastHistoryLoading)return;
  forecastHistoryLoading=true;forecastHistoryError='';
  const status=$('forecastConfidence'),panel=$('monthForecast');
- if(status)status.textContent='Использую уже загруженные архивы…';
- if(panel)panel.innerHTML='<div class="empty">Собираю прогноз из уже загруженных данных…</div>';
+ if(status)status.textContent='Подготавливаю историю прогноза…';
+ if(panel)panel.innerHTML='<div class="empty">Загружаю необходимые архивы для прогноза…</div>';
  try{
+  if(warmupPromise)await warmupPromise;
+  const now=new Date(),currentStart=new Date(now.getFullYear(),now.getMonth(),1);
+  const historyStart=new Date(now.getFullYear(),now.getMonth()-12,1);
+  const historyEnd=new Date(now.getFullYear(),now.getMonth(),0,23,59,59,999);
+  const required=monthsForRange(historyStart,historyEnd);
+  const missing=required.filter(month=>!loadedMonthPayloads.has(month));
+  if(missing.length){
+   if(status)status.textContent='Для прогноза загружаю ещё '+missing.length+' архивов…';
+   await loadArchiveData(password,missing);
+  }
   const builtHistory=refreshForecastHistory();
-  const currentKey=new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0');
-  const completedMonths=builtHistory.months.filter(k=>k<currentKey).length;
-  if(status)status.textContent=completedMonths
-   ?'История прогноза: '+completedMonths+' завершённых месяцев'
-   :'Выбери период, чтобы загрузить историю для прогноза';
+  const completedMonths=builtHistory.months.filter(k=>k<monthKey(currentStart)).length;
+  if(status)status.textContent='История прогноза: '+completedMonths+' завершённых месяцев';
  }catch(e){
   forecastHistoryError=e.message||'Не удалось подготовить историю прогноза';
-  if(status)status.textContent='Не удалось подготовить историю';
+  if(status)status.textContent='Не удалось подготовить историю: '+forecastHistoryError;
   console.error('[Finance] Forecast preparation:',e);
  }finally{
   forecastHistoryLoading=false;
@@ -781,7 +788,7 @@ async function loadArchiveData(pass, requestedMonths=null){
  });
  return {headers,rows,months:loaded.length,availableMonths:archives.map(x=>x.month),loadedMonths:loaded.map(x=>x.month)};
 }
-let warmupToken=0;let forecastHistoryOps=null,forecastHistoryMeta=null,forecastHistoryReady=false,forecastHistoryLoading=false,forecastHistoryError='';
+let warmupToken=0,warmupPromise=null;let forecastHistoryOps=null,forecastHistoryMeta=null,forecastHistoryReady=false,forecastHistoryLoading=false,forecastHistoryError='';
 async function warmArchiveCache(pass){
  const token=++warmupToken;
  const stages=[
@@ -905,7 +912,7 @@ async function loadDashboard(pass){
  $('dataStatus').textContent=`${ops.length.toLocaleString('ru-RU')} операций · ${data.months}/${data.availableMonths.length} месяцев загружено`;const allBtn=$('loadAllArchives');if(allBtn)allBtn.textContent=data.months===data.availableMonths.length?'Вся история загружена':'Загрузить всю историю';
  $('calendarMonth').value=new Date().toISOString().slice(0,7);
  const renderStart=performance.now();renderAll();updatePendingStatus();timings.render=Math.round(performance.now()-renderStart);
- timings.total=Math.round(performance.now()-totalStart);console.info('[Finance] Время загрузки, мс',timings);refreshForecastHistory();warmArchiveCache(pass);
+ timings.total=Math.round(performance.now()-totalStart);console.info('[Finance] Время загрузки, мс',timings);refreshForecastHistory();warmupPromise=warmArchiveCache(pass);
 }
 
 const ARCHIVE_PBKDF2_ITERATIONS = 600000;
