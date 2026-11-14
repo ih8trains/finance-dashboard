@@ -443,7 +443,7 @@ button:active,.btn:active,.primary:active{transform:translateY(1px) scale(.985)}
 @media(max-width:650px){.forecast-layout{grid-template-columns:1fr;gap:12px}.forecast-metrics{grid-template-columns:1fr 1fr}.forecast-value{font-size:34px}.forecast-metric{padding:10px}.forecast-metric b{font-size:15px}.forecast-progress-head{align-items:flex-start;flex-direction:column}}
 </style></head><body>
 <section class="login" id="loginView"><div class="login-card"><h1>Финансовая система</h1><p>Личная аналитика и управление бюджетом</p><form id="loginForm"><input class="field" id="passwordInput" type="password" placeholder="Пароль доступа" autocomplete="current-password" required><button class="primary" id="loginButton">Войти</button></form><div class="error" id="loginError"></div></div></section>
-<div class="layout hidden" id="appView"><aside class="sidebar"><div class="brand"><div><strong>FINANCE / OS</strong><small>PERSONAL CONTROL</small></div></div><div class="nav-label">Управление</div><nav class="nav" id="mainNav"><button class="active" data-page="overview"><span class="nav-ico">◫</span><span>Обзор</span></button><button data-page="forecast"><span class="nav-ico">◷</span><span>Прогноз</span></button><button data-page="income"><span class="nav-ico">↗</span><span>Доходы</span></button><button data-page="expenses"><span class="nav-ico">↘</span><span>Расходы</span></button><button data-page="budget"><span class="nav-ico">▤</span><span>Бюджет и цели</span></button><button data-page="optimize"><span class="nav-ico">⌁</span><span>Оптимизация</span></button><button data-page="operations"><span class="nav-ico">☷</span><span>Операции</span></button><div class="nav-label">Аналитика</div><button data-page="merchants"><span class="nav-ico">▦</span><span>Магазины</span></button><button data-page="subscriptions"><span class="nav-ico">⟳</span><span>Подписки</span></button><button data-page="calendar"><span class="nav-ico">▦</span><span>Календарь</span></button><button data-page="analytics"><span class="nav-ico">⌗</span><span>Аналитика</span></button><div class="nav-label">Настройки</div><button data-page="tags"><span class="nav-ico">◇</span><span>Категории и теги</span></button><button data-page="rules"><span class="nav-ico">⚙</span><span>Автоправила</span></button><button data-page="settings"><span class="nav-ico">☰</span><span>Настройки</span></button></nav><div class="sidebar-bottom">Банковские операции из GitHub<br>Разметка хранится в GitHub</div></aside>
+<div class="layout hidden" id="appView"><aside class="sidebar"><div class="brand"><div><strong>FINANCE / OS</strong><small>PERSONAL CONTROL</small></div></div><div class="nav-label">Управление</div><nav class="nav" id="mainNav"><button class="active" data-page="overview"><span class="nav-ico">◫</span><span>Обзор</span></button><button data-page="forecast"><span class="nav-ico">◷</span><span>Прогноз</span></button><button data-page="income"><span class="nav-ico">↗</span><span>Доходы</span></button><button data-page="expenses"><span class="nav-ico">↘</span><span>Расходы</span></button><button data-page="budget"><span class="nav-ico">▤</span><span>Бюджет и цели</span></button><button data-page="optimize"><span class="nav-ico">⌁</span><span>Оптимизация</span></button><button data-page="operations"><span class="nav-ico">☷</span><span>Операции</span></button><div class="nav-label">Аналитика</div><button data-page="merchants"><span class="nav-ico">▦</span><span>Магазины</span></button><button data-page="subscriptions"><span class="nav-ico">⟳</span><span>Подписки</span></button><button data-page="calendar"><span class="nav-ico">▦</span><span>Календарь</span></button><button data-page="analytics"><span class="nav-ico">⌗</span><span>Аналитика</span></button><div class="nav-label">Настройки</div><button data-page="tags"><span class="nav-ico">◇</span><span>Категории и теги</span></button><button data-page="rules"><span class="nav-ico">⚙</span><span>Автоправила</span></button><button data-page="settings"><span class="nav-ico">☰</span><span>Настройки</span></button></nav></aside>
 <main class="main"><header class="topbar"><div class="page-title"><h1 id="pageHeading">Обзор</h1><p id="pageSub">Главное о денежных потоках за выбранный период</p></div><div class="top-actions"><span class="status" id="dataStatus">Ожидание данных</span><span class="pending-status" id="pendingStatus" title="Нажми, чтобы повторить отправку несохранённых изменений"></span><button class="btn" id="reloadButton">Обновить</button><button class="btn" id="logoutButton">Выйти</button></div></header>
 <div class="periodbar" id="periodbar"><button data-range="currentMonth" class="active">Текущий месяц</button><button data-range="month">Месяц</button><button data-range="quarter">Квартал</button><button data-range="halfYear">Полгода</button><button data-range="year">1 год</button><button data-range="twoYears">2 года</button><button data-range="custom">Период</button><button class="btn small" id="loadAllArchives">Загрузить всю историю</button><span class="spacer"></span><input class="field hidden" type="date" id="dateFrom"><input class="field hidden" type="date" id="dateTo"><select class="field" id="scopeMode"><option value="personal">Доходы и расходы</option><option value="all">Все операции</option></select></div>
 <div class="loading-overlay hidden" id="rangeLoading" aria-live="polite"><div class="loading-box"><div class="loading-spinner"></div><b id="rangeLoadingText">Загружаю выбранный период…</b><div class="muted" style="margin-top:5px;font-size:11px">Данные другого периода не отображаются</div></div></div><section class="page active" id="page-overview"><div class="grid kpis"><article class="kpi"><div class="kpi-label">Доходы</div><div class="kpi-value positive" id="kIncome">—</div><div class="kpi-note" id="kIncomeNote">Все источники</div></article><article class="kpi"><div class="kpi-label">Расходы</div><div class="kpi-value negative" id="kExpense">—</div><div class="kpi-note" id="kExpenseNote">Все списания, кроме внутренних переводов</div></article><article class="kpi"><div class="kpi-label">Чистый результат</div><div class="kpi-value" id="kNet">—</div><div class="kpi-note">Доходы минус расходы</div></article><article class="kpi"><div class="kpi-label">Норма сбережений</div><div class="kpi-value" id="kSaving">—</div><div class="kpi-note">От чистого дохода</div></article><article class="kpi"><div class="kpi-label">Транзитные платежи</div><div class="kpi-value" id="kTransit">—</div><div class="kpi-note">За других / возмещение</div></article><article class="kpi"><div class="kpi-label">Нужно разобрать</div><div class="kpi-value" id="kUnsorted">—</div><div class="kpi-note">Неопределённые операции</div></article></div>
@@ -508,9 +508,40 @@ function forecastIncoming(history,current,today,end){
  const remaining=Math.max(0,expectedMonthly-currentMikhail);
  if(monthlySamples.length>=2&&remaining>0)items.push({name:'Доход от бизнеса на Ozon',date:end,amount:remaining,kind:'marketplace_monthly'});
  return {amount:items.reduce((sum,x)=>sum+x.amount,0),items,diagnostics:{payroll10:payroll.filter(o=>Math.abs(o.date.getDate()-10)<=4&&monthKey(o.date)!==currentKey).length,payroll25:payroll.filter(o=>Math.abs(o.date.getDate()-25)<=4&&monthKey(o.date)!==currentKey).length,ozonPositiveMonths:monthlySamples.length,ozonObservedMonths:recentKeys.length,ozonMedian:expectedMonthly,ozonCurrent:currentMikhail}};
-}function buildForecastHistory(){const months=[...loadedMonthPayloads.values()].sort((a,b)=>String(a.month).localeCompare(String(b.month))),headers=[];months.forEach(m=>m.headers.forEach(h=>{if(!headers.includes(h))headers.push(h)}));const rows=[];months.forEach(m=>{const ix=headers.map(h=>m.headers.indexOf(h));m.rows.forEach(row=>rows.push(ix.map(i=>i<0?'':row[i]??'')));});const n=normalize(headers,rows);applyRules(n.items);return {items:n.items,months:months.map(m=>m.month),meta:{inner:n.inner,invalid:n.invalid,other:n.other,innerCredit:n.innerCredit,innerDebit:n.innerDebit,innerCreditAmount:n.innerCreditAmount,innerDebitAmount:n.innerDebitAmount}}}
-async function ensureForecastHistory(pass){if(forecastHistoryReady||forecastHistoryLoading)return;forecastHistoryLoading=true;forecastHistoryError='';const loadButton=$('loadAllArchives');if(loadButton)loadButton.disabled=true;const archives=archiveManifest?.archives?.filter(x=>x&&x.status==='verified').sort((a,b)=>String(a.month).localeCompare(String(b.month)))||[];try{for(let i=0;i<archives.length;i++){const month=archives[i].month;if(!loadedMonthPayloads.has(month))await loadArchiveData(pass,[month]);const el=$('forecastConfidence');if(el)el.textContent='Анализ истории '+(i+1)+'/'+archives.length}const builtHistory=buildForecastHistory();forecastHistoryOps=builtHistory.items;forecastHistoryMeta=builtHistory.meta;forecastHistoryReady=true;$('dataStatus').textContent=ops.length.toLocaleString('ru-RU')+' операций · история для прогноза: '+archives.length+' месяцев';const btn=$('loadAllArchives');if(btn){btn.textContent='Вся история загружена';btn.disabled=false}renderCurrentPage()}catch(e){forecastHistoryError=e.message||'Не удалось загрузить исторические данные';const el=$('forecastConfidence');if(el)el.textContent='История недоступна';console.error('[Finance] Forecast history:',e)}finally{forecastHistoryLoading=false;if(!forecastHistoryReady)renderMonthForecast()}}
-function isForecastTransfer(o){return /^перевод/i.test(String(o.bankCategory||''))}
+}function buildForecastHistory(){
+ const months=[...loadedMonthPayloads.values()].sort((a,b)=>String(a.month).localeCompare(String(b.month))),headers=[];
+ months.forEach(m=>m.headers.forEach(h=>{if(!headers.includes(h))headers.push(h)}));
+ const rows=[];
+ months.forEach(m=>{const ix=headers.map(h=>m.headers.indexOf(h));m.rows.forEach(row=>rows.push(ix.map(i=>i<0?'':row[i]??'')))});
+ const n=normalize(headers,rows);
+ rawHeaders=headers;rawRows=rows;ops=n.items;lastMeta=n;
+ applyRules();
+ return {items:ops,months:months.map(m=>m.month),meta:{inner:n.inner,invalid:n.invalid,other:n.other,innerCredit:n.innerCredit,innerDebit:n.innerDebit,innerCreditAmount:n.innerCreditAmount,innerDebitAmount:n.innerDebitAmount}};
+}async function ensureForecastHistory(pass){
+ if(forecastHistoryReady||forecastHistoryLoading)return;
+ forecastHistoryLoading=true;forecastHistoryError='';
+ const loadButton=$('loadAllArchives');if(loadButton)loadButton.disabled=true;
+ const archives=archiveManifest?.archives?.filter(x=>x&&x.status==='verified').sort((a,b)=>String(a.month).localeCompare(String(b.month)))||[];
+ try{
+  for(let i=0;i<archives.length;i++){
+   const month=archives[i].month;
+   if(!loadedMonthPayloads.has(month))await loadArchiveData(pass,[month]);
+   const el=$('forecastConfidence');if(el)el.textContent='Загрузка истории '+(i+1)+'/'+archives.length;
+  }
+  const builtHistory=buildForecastHistory();
+  forecastHistoryOps=builtHistory.items;forecastHistoryMeta=builtHistory.meta;forecastHistoryReady=true;
+  $('dataStatus').textContent=ops.length.toLocaleString('ru-RU')+' операций · вся история: '+archives.length+' месяцев';
+  const btn=$('loadAllArchives');if(btn){btn.textContent='Вся история загружена';btn.disabled=false}
+  renderAll();
+ }catch(e){
+  forecastHistoryError=e.message||'Не удалось загрузить исторические данные';
+  const el=$('forecastConfidence');if(el)el.textContent='История недоступна';
+  console.error('[Finance] Forecast history:',e);
+ }finally{
+  forecastHistoryLoading=false;
+  if(!forecastHistoryReady)renderMonthForecast();
+ }
+}function isForecastTransfer(o){return /^перевод/i.test(String(o.bankCategory||''))}
 function calculateMonthForecast(){
  if(!forecastHistoryReady||!forecastHistoryOps)return null;
  const now=new Date(),y=now.getFullYear(),m=now.getMonth(),start=new Date(y,m,1),end=new Date(y,m+1,0,23,59,59,999),elapsed=now.getDate(),days=end.getDate(),remaining=Math.max(0,days-elapsed),history=forecastHistoryOps,today=new Date(y,m,elapsed,23,59,59,999),current=history.filter(o=>o.date>=start&&o.date<=today),income=trueIncome(current),expenses=personalExpenses(current),actualIncome=income.reduce((s,o)=>s+o.amount,0),actualExpenses=expenses.reduce((s,o)=>s+o.amount,0),incomingForecast=forecastIncoming(history,current,today,end),recurring=(settings.recurringPayments||[]).filter(x=>x.enabled!==false),isRec=o=>recurring.some(x=>recurringMatch(o,x)),historyExpenses=history.filter(o=>o.type==='expense'&&scopeOf(o)==='personal'&&o.date<start&&!isRec(o)),monthRows=new Map(),currentKey=y+'-'+String(m+1).padStart(2,'0');
@@ -706,21 +737,12 @@ async function loadMoreForCurrentRange(){
  finally{if(token===rangeLoadToken)$('rangeLoading').classList.add('hidden')}
 }
 async function loadAllArchives(){
- if(!archiveManifest)return;
- const all=archiveManifest.archives.filter(x=>x.status==='verified').map(x=>x.month);
- const missing=all.filter(m=>!loadedMonthPayloads.has(m));
- if(!missing.length){$('dataStatus').textContent='Вся история уже загружена';return}
- const btn=$('loadAllArchives');btn.disabled=true;btn.textContent='Загружаю…';
- try{
-  const data=await loadArchiveData(password,missing);
-  rawHeaders=data.headers;rawRows=data.rows;
-  const n=normalize(rawHeaders,rawRows);ops=n.items;lastMeta=n;applyRules();renderAll();
+ await ensureForecastHistory(password);
+ if(forecastHistoryReady){
+  const btn=$('loadAllArchives');if(btn){btn.textContent='Вся история загружена';btn.disabled=false}
   $('dataStatus').textContent=ops.length.toLocaleString('ru-RU')+' операций · вся история загружена';
-  btn.textContent='Вся история загружена';
- }catch(e){$('dataStatus').textContent='Ошибка загрузки истории';alert(e.message);btn.textContent='Загрузить всю историю'}
- finally{btn.disabled=false}
-}
-async function loadUserData(pass){
+ }
+}async function loadUserData(pass){
  const url='https://raw.githubusercontent.com/ih8trains/finance-dashboard/main/'+USER_DATA_PATH+'?t='+Date.now();
  const response=await fetch(url,{cache:'no-store'});
  if(response.status===404)return {labels:{},settings:{},rules:[]};
