@@ -539,20 +539,21 @@ function buildIncomeBacktest(){
   const targetPayroll=payroll.filter(o=>key(o.date)===target),targetOzon=ozon.filter(o=>key(o.date)===target);
   const sums=new Map();prior.forEach(k=>sums.set(k,0));
   ozon.filter(o=>o.date<start).forEach(o=>{const k=key(o.date);if(sums.has(k))sums.set(k,sums.get(k)+o.amount)});
-  const monthlyValues=[...sums.values()],positives=monthlyValues.filter(v=>v>0);
-  if(positives.length<3)return;
-  const activeMedian=median(positives),frequencyExpected=activeMedian*positives.length/Math.max(1,prior.length);
+  const monthlyValues=[...sums.values()],positives=monthlyValues.filter(v=>v>0),hasOzonHistory=positives.length>=3;
+  const activeMedian=hasOzonHistory?median(positives):0,frequencyExpected=hasOzonHistory?activeMedian*positives.length/Math.max(1,prior.length):0;
   const actualOzon=targetOzon.reduce((sum,o)=>sum+o.amount,0);
   cutoffs.forEach(day=>{
    if(day>=end.getDate())return;
    const cutoff=new Date(y,m-1,day,23,59,59,999);
-   const currentOzon=targetOzon.filter(o=>o.date<=cutoff).reduce((sum,o)=>sum+o.amount,0);
-   const frequencyPredicted=Math.max(currentOzon,frequencyExpected);
-   out.push({source:'Доход от бизнеса на Ozon · с учётом частоты выплат',month:target,day,predicted:frequencyPredicted,actual:actualOzon,error:frequencyPredicted-actualOzon,activeMonths:positives.length,historyMonths:prior.length});
-   // Медиана активного месяца — условная оценка только для месяцев, когда выплата действительно была.
-   if(actualOzon>0){
-    const activePredicted=Math.max(currentOzon,activeMedian);
-    out.push({source:'Доход от бизнеса на Ozon · медиана активного месяца',month:target,day,predicted:activePredicted,actual:actualOzon,error:activePredicted-actualOzon,activeMonths:positives.length,historyMonths:prior.length});
+   if(hasOzonHistory){
+    const currentOzon=targetOzon.filter(o=>o.date<=cutoff).reduce((sum,o)=>sum+o.amount,0);
+    const frequencyPredicted=Math.max(currentOzon,frequencyExpected);
+    out.push({source:'Доход от бизнеса на Ozon · с учётом частоты выплат',month:target,day,predicted:frequencyPredicted,actual:actualOzon,error:frequencyPredicted-actualOzon,activeMonths:positives.length,historyMonths:prior.length});
+    // Медиана активного месяца — условная оценка только для месяцев, когда выплата действительно была.
+    if(actualOzon>0){
+     const activePredicted=Math.max(currentOzon,activeMedian);
+     out.push({source:'Доход от бизнеса на Ozon · медиана активного месяца',month:target,day,predicted:activePredicted,actual:actualOzon,error:activePredicted-actualOzon,activeMonths:positives.length,historyMonths:prior.length});
+    }
    }
    const currentPayroll=targetPayroll.filter(o=>o.date<=cutoff).reduce((sum,o)=>sum+o.amount,0);
    const futurePayroll=[10,25].reduce((sum,d)=>{
