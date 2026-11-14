@@ -560,6 +560,23 @@ function refreshForecastHistory(){
  return builtHistory;
 }
 function isForecastTransfer(o){return /^перевод/i.test(String(o.bankCategory||''))}
+function buildOtherCategoryForecast(monthRows,priorKeys,day,fallbackShare,currentRows=[]){
+ const baseKeys=priorKeys.slice(-12),shareKeys=priorKeys.slice(-6),categories=new Set();
+ baseKeys.forEach(k=>(monthRows.get(k)||[]).forEach(o=>{if(!isForecastTransfer(o))categories.add(String(o.bankCategory||'Без категории'))}));
+ return [...categories].map(name=>{
+  const totals=baseKeys.map(k=>(monthRows.get(k)||[]).filter(o=>!isForecastTransfer(o)&&String(o.bankCategory||'Без категории')===name).reduce((sum,o)=>sum+o.amount,0));
+  const historical=totals.length?totals.reduce((a,b)=>a+b,0)/totals.length:0;
+  const shares=shareKeys.map(k=>{
+   const rows=(monthRows.get(k)||[]).filter(o=>!isForecastTransfer(o)&&String(o.bankCategory||'Без категории')===name),total=rows.reduce((sum,o)=>sum+o.amount,0);
+   if(!total)return null;
+   const limit=Math.min(day,new Date(Number(k.slice(0,4)),Number(k.slice(5,7)),0).getDate());
+   return rows.filter(o=>o.date.getDate()<=limit).reduce((sum,o)=>sum+o.amount,0)/total;
+  }).filter(Number.isFinite);
+  const share=shares.length>=3?Math.max(.05,Math.min(.95,shares.reduce((a,b)=>a+b,0)/shares.length)):fallbackShare;
+  const current=currentRows.filter(o=>!isForecastTransfer(o)&&String(o.bankCategory||'Без категории')===name).reduce((sum,o)=>sum+o.amount,0);
+  return {name,historical,occurrence:totals.filter(v=>v>0).length/Math.max(1,totals.length),current,future:Number.isFinite(share)?Math.max(0,historical*(1-share)):0};
+ }).filter(x=>x.historical>0).sort((a,b)=>b.future-a.future);
+}
 function estimateOtherCategoryFuture(monthRows,priorKeys,day,fallbackShare){
  const baseKeys=priorKeys.slice(-12),shareKeys=priorKeys.slice(-6),categories=new Set();
  baseKeys.forEach(k=>(monthRows.get(k)||[]).forEach(o=>{if(!isForecastTransfer(o))categories.add(String(o.bankCategory||'Без категории'))}));
@@ -629,7 +646,7 @@ function calculateMonthForecast(){
  let recurringFuture=0,upcoming=[];
  recurring.forEach(x=>{const last=expenses.filter(o=>recurringMatch(o,x)).sort((a,b)=>b.ts-a.ts)[0],amount=num(x.amount)||last?.amount||0;if(amount<=0)return;const freq=Math.max(1,num(x.frequencyDays)||30);let next=parseDate(x.nextDate);if(!next&&last)next=new Date(last.ts+freq*86400000);if(!next)return;next=new Date(next.getFullYear(),next.getMonth(),next.getDate());let guard=0;while(next<=today&&guard++<500)next=new Date(next.getFullYear(),next.getMonth(),next.getDate()+freq);while(next<=end&&guard++<520){recurringFuture+=amount;upcoming.push({name:x.name||x.match,date:new Date(next),amount});next=new Date(next.getFullYear(),next.getMonth(),next.getDate()+freq)}});
  const monthlyTotals=keys.slice(-12).map(k=>monthRows.get(k).reduce((sum,o)=>sum+o.amount,0)),positiveTotals=monthlyTotals.filter(v=>v>0),center=median(positiveTotals),mad=median(positiveTotals.map(v=>Math.abs(v-center))),uncertainty=center>0?Math.max(.1,Math.min(.4,1.4826*mad/center)):.25,budget=settings.budget||{},plan=num(budget.income),projectedIncome=actualIncome+incomingForecast.amount,projectedExpenses=actualExpenses+variableFuture+recurringFuture;
- return {remaining,elapsed,days,actualIncome,actualExpenses,variableFuture,transferFuture:transfer.future,otherFuture:categoryFuture,transferBaseline:transfer.baseline,otherBaseline:other.baseline,transferShare:transfer.historicalShare,otherShare:other.historicalShare,recurringFuture,incomingForecast,projectedIncome,projectedExpenses,projectedNet:projectedIncome-projectedExpenses,plan,upcoming,hasPlan:plan>0,historyMonths:keys.length,historyOperations:history.length,baseline:transfer.baseline+other.baseline,historicalShare:(transfer.historicalShare+other.historicalShare)/2,pace:1,elasticity:0,uncertainty,low:actualExpenses+variableFuture*(1-uncertainty)+recurringFuture,high:actualExpenses+variableFuture*(1+uncertainty)+recurringFuture,top:[],categoryForecast:[]}
+ return {remaining,elapsed,days,actualIncome,actualExpenses,variableFuture,transferFuture:transfer.future,otherFuture:categoryFuture,transferBaseline:transfer.baseline,otherBaseline:other.baseline,transferShare:transfer.historicalShare,otherShare:other.historicalShare,recurringFuture,incomingForecast,projectedIncome,projectedExpenses,projectedNet:projectedIncome-projectedExpenses,plan,upcoming,hasPlan:plan>0,historyMonths:keys.length,historyOperations:history.length,baseline:transfer.baseline+other.baseline,historicalShare:(transfer.historicalShare+other.historicalShare)/2,pace:1,elasticity:0,uncertainty,low:actualExpenses+variableFuture*(1-uncertainty)+recurringFuture,high:actualExpenses+variableFuture*(1+uncertainty)+recurringFuture,top:[],categoryForecast:buildOtherCategoryForecast(monthRows,keys,elapsed,other.historicalShare,expenses)}
 }
 
 let forecastIncomeBacktestCache=null;
@@ -687,7 +704,7 @@ function buildForecastBacktest(config={id:'current',transferLookback:6,transferS
   cutoffs.forEach(day=>{
    if(day>=monthDays)return;
    const toDateRows=targetOps.filter(o=>o.date.getDate()<=day),actualTransferToDate=toDateRows.filter(isForecastTransfer).reduce((sum,o)=>sum+o.amount,0),actualOtherToDate=toDateRows.filter(o=>!isForecastTransfer(o)).reduce((sum,o)=>sum+o.amount,0),actualToDate=actualTransferToDate+actualOtherToDate,actualTransfer=targetOps.filter(isForecastTransfer).reduce((sum,o)=>sum+o.amount,0),actualOther=targetOps.filter(o=>!isForecastTransfer(o)).reduce((sum,o)=>sum+o.amount,0),transfer=estimateComponent(true,config.transferLookback,config.transferShareLookback,'median',day),other=estimateComponent(false,config.otherLookback,config.otherShareLookback,'mean',day),predictedTransfer=actualTransferToDate+transfer.future,predictedOther=actualOtherToDate+other.future,predicted=predictedTransfer+predictedOther,error=predicted-actual,transferError=predictedTransfer-actualTransfer,otherError=predictedOther-actualOther;
-   results.push({month:targetKey,day,predicted,actual,error,absPct:Math.abs(error)/Math.max(1,actual),actualToDate,actualTransfer,actualOther,actualTransferToDate,actualOtherToDate,predictedTransfer,predictedOther,transferError,otherError,future:transfer.future+other.future,transferFuture:transfer.future,otherFuture:other.future,baseline:transfer.baseline+other.baseline,share:(transfer.share+other.share)/2});
+   results.push({month:targetKey,day,predicted,actual,error,absPct:Math.abs(error)/Math.max(1,actual),actualToDate,actualTransfer,actualOther,actualTransferToDate,actualOtherToDate,predictedTransfer,predictedOther,transferError,otherError,future:transfer.future+other.future,transferFuture:transfer.future,otherFuture:other.future,baseline:transfer.baseline+other.baseline,share:(transfer.share+other.share)/2,otherShare:other.share});
   });
  });
  return results;
