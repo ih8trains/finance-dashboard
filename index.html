@@ -521,35 +521,23 @@ async function prepareForecastHistory(){
  if(forecastHistoryLoading)return;
  forecastHistoryLoading=true;forecastHistoryError='';
  const status=$('forecastConfidence'),panel=$('monthForecast');
- if(status)status.textContent='Проверяю загруженную историю…';
- if(panel)panel.innerHTML='<div class="empty">Подготавливаю данные для прогноза…</div>';
+ if(status)status.textContent='Использую уже загруженные архивы…';
+ if(panel)panel.innerHTML='<div class="empty">Собираю прогноз из уже загруженных данных…</div>';
  try{
-  if(!archiveManifest){
-   const manifestUrl='https://raw.githubusercontent.com/ih8trains/finance-dashboard/main/data/manifest.json';
-   const response=await fetch(manifestUrl,{cache:'no-store'});
-   if(!response.ok)throw new Error('Не удалось загрузить манифест архивов. HTTP '+response.status);
-   archiveManifest=await response.json();
-  }
-  const now=new Date(),required=[];
-  for(let offset=12;offset>=1;offset--){
-   const d=new Date(now.getFullYear(),now.getMonth()-offset,1);
-   required.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'));
-  }
-  const available=new Set((archiveManifest.archives||[]).filter(x=>x&&x.status==='verified').map(x=>x.month));
-  const wanted=required.filter(k=>available.has(k)&&!loadedMonthPayloads.has(k));
-  for(let i=0;i<wanted.length;i++){
-   if(status)status.textContent='Загружаю историю для прогноза '+(i+1)+'/'+wanted.length;
-   await loadArchiveData(password,[wanted[i]]);
-  }
-  refreshForecastHistory();
-  if(status)status.textContent='История прогноза: '+[...loadedMonthPayloads.keys()].filter(k=>k<now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')).length+' загруженных месяцев';
+  const builtHistory=refreshForecastHistory();
+  const currentKey=new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0');
+  const completedMonths=builtHistory.months.filter(k=>k<currentKey).length;
+  if(status)status.textContent=completedMonths
+   ?'История прогноза: '+completedMonths+' завершённых месяцев'
+   :'Выбери период, чтобы загрузить историю для прогноза';
  }catch(e){
-  forecastHistoryError=e.message||'Не удалось загрузить историю прогноза';
+  forecastHistoryError=e.message||'Не удалось подготовить историю прогноза';
   if(status)status.textContent='Не удалось подготовить историю';
   console.error('[Finance] Forecast preparation:',e);
  }finally{
   forecastHistoryLoading=false;
-  renderMonthForecast();renderForecastBacktestUnsafe();
+  renderMonthForecast();
+  renderForecastBacktestUnsafe();
  }
 }
 function refreshForecastHistory(){
@@ -667,7 +655,7 @@ function buildIncomeBacktest(){
   });
  });
  return out;
-}function renderMonthForecast(){const el=$('monthForecast');if(!el)return;if(forecastHistoryLoading){el.innerHTML='<div class="empty">Загружаю только недостающие месяцы истории для прогноза…</div>';return}if(!forecastHistoryReady){el.innerHTML='<div class="empty">'+(forecastHistoryLoading?'Загружаю и анализирую архивы за всю историю…':forecastHistoryError?'Не удалось построить прогноз: '+esc(forecastHistoryError):'Подготавливаю исторические данные…')+'</div>';return}const f=calculateMonthForecast();if(!f){el.innerHTML='<div class="empty">В памяти пока только текущий месяц. Выбери «Месяц», «Квартал» или «Полгода»: прогноз возьмёт уже загруженные месяцы и не будет скачивать всю историю.</div>';return}const next=f.upcoming.sort((a,b)=>a.date-b.date).slice(0,3);$('forecastConfidence').textContent=f.historyMonths>=12?'История 12+ месяцев':f.historyMonths>=6?'История 6–11 месяцев':'Короткая история';el.innerHTML='<div class="forecast-layout"><div class="forecast-result"><div class="kpi-label">Ожидаемый чистый результат месяца</div><div class="forecast-value '+(f.projectedNet>=0?'positive':'negative')+'">'+money(f.projectedNet)+'</div><div class="forecast-caption">Прогноз доходов минус прогноз личных расходов</div></div><div class="forecast-metrics"><div class="forecast-metric"><span>Доходы · прогноз</span><b class="positive">'+money(f.projectedIncome)+'</b><small>Факт: '+money(f.actualIncome)+(f.hasPlan?' · план: '+money(f.plan):'')+'</small></div><div class="forecast-metric"><span>Расходы · прогноз</span><b class="negative">'+money(f.projectedExpenses)+'</b><small>Факт: '+money(f.actualExpenses)+' · впереди: '+money(f.variableFuture+f.recurringFuture)+'</small></div><div class="forecast-metric"><span>Диапазон расходов</span><b>'+money(f.low)+'–'+money(f.high)+'</b><small>Историческая волатильность: ±'+Math.round(f.uncertainty*100)+'% переменной части</small></div><div class="forecast-metric"><span>До конца месяца</span><b>'+f.remaining+' дней</b><small>'+f.elapsed+' из '+f.days+' дней учтено</small></div></div></div><div class="forecast-progress"><div class="forecast-progress-head"><span>Факт и прогноз</span><b>'+money(f.actualExpenses)+' + '+money(f.variableFuture+f.recurringFuture)+'</b></div><div class="progress"><span style="width:'+(f.projectedExpenses?Math.min(100,f.actualExpenses/f.projectedExpenses*100):0)+'%"></span></div></div><div class="forecast-foot"><span>Модель: историческая месячная база с поправкой на долю расходов, обычно уже совершённую к текущему дню. База переводов: '+money(f.transferBaseline)+'/мес. (до текущего дня '+Math.round(f.transferShare*100)+'%); остальные расходы: '+money(f.otherBaseline)+'/мес. (до текущего дня '+Math.round(f.otherShare*100)+'%).</span><span>История: '+f.historyOperations.toLocaleString('ru-RU')+' операций за '+f.historyMonths+' месяцев. '+(f.incomingForecast.items.length?'Ожидаемые поступления: '+f.incomingForecast.items.map(x=>x.name+' — '+money(x.amount)+(x.kind==='marketplace_monthly'?' (оценка до конца месяца)':' ('+x.date.toLocaleDateString('ru-RU')+')')).join('; ')+'.':'Регулярные поступления не подтверждены историей.')+(f.incomingForecast.diagnostics?' Выплаты Совкомбанка в истории: около 10-го — '+f.incomingForecast.diagnostics.payroll10+' операций, около 25-го — '+f.incomingForecast.diagnostics.payroll25+'. Доход от бизнеса на Ozon: выплаты в '+f.incomingForecast.diagnostics.ozonPositiveMonths+' из последних '+f.incomingForecast.diagnostics.ozonObservedMonths+' месяцев; медиана '+money(f.incomingForecast.diagnostics.ozonMedian)+', уже получено '+money(f.incomingForecast.diagnostics.ozonCurrent)+'.':'')+'</span>'+(f.top.length?'<span>Основные будущие категории: '+f.top.map(x=>esc(x.name)+' · '+money(x.amount)).join(' · ')+'</span>':'')+(next.length?'<span class="forecast-upcoming">Ближайшие платежи: '+next.map(x=>esc(x.name)+' · '+x.date.toLocaleDateString('ru-RU',{day:'numeric',month:'short'})+' · '+money(x.amount)).join(' · ')+'</span>':'')+'</div>'}
+}function renderMonthForecast(){const el=$('monthForecast');if(!el)return;if(forecastHistoryLoading){el.innerHTML='<div class="empty">Собираю прогноз из уже загруженных архивов…</div>';return}if(!forecastHistoryReady){el.innerHTML='<div class="empty">'+(forecastHistoryLoading?'Загружаю и анализирую архивы за всю историю…':forecastHistoryError?'Не удалось построить прогноз: '+esc(forecastHistoryError):'Подготавливаю исторические данные…')+'</div>';return}const f=calculateMonthForecast();if(!f){el.innerHTML='<div class="empty">В памяти пока только текущий месяц. Выбери «Месяц», «Квартал» или «Полгода»: прогноз возьмёт уже загруженные месяцы и не будет скачивать всю историю.</div>';return}const next=f.upcoming.sort((a,b)=>a.date-b.date).slice(0,3);$('forecastConfidence').textContent=f.historyMonths>=12?'История 12+ месяцев':f.historyMonths>=6?'История 6–11 месяцев':'Короткая история';el.innerHTML='<div class="forecast-layout"><div class="forecast-result"><div class="kpi-label">Ожидаемый чистый результат месяца</div><div class="forecast-value '+(f.projectedNet>=0?'positive':'negative')+'">'+money(f.projectedNet)+'</div><div class="forecast-caption">Прогноз доходов минус прогноз личных расходов</div></div><div class="forecast-metrics"><div class="forecast-metric"><span>Доходы · прогноз</span><b class="positive">'+money(f.projectedIncome)+'</b><small>Факт: '+money(f.actualIncome)+(f.hasPlan?' · план: '+money(f.plan):'')+'</small></div><div class="forecast-metric"><span>Расходы · прогноз</span><b class="negative">'+money(f.projectedExpenses)+'</b><small>Факт: '+money(f.actualExpenses)+' · впереди: '+money(f.variableFuture+f.recurringFuture)+'</small></div><div class="forecast-metric"><span>Диапазон расходов</span><b>'+money(f.low)+'–'+money(f.high)+'</b><small>Историческая волатильность: ±'+Math.round(f.uncertainty*100)+'% переменной части</small></div><div class="forecast-metric"><span>До конца месяца</span><b>'+f.remaining+' дней</b><small>'+f.elapsed+' из '+f.days+' дней учтено</small></div></div></div><div class="forecast-progress"><div class="forecast-progress-head"><span>Факт и прогноз</span><b>'+money(f.actualExpenses)+' + '+money(f.variableFuture+f.recurringFuture)+'</b></div><div class="progress"><span style="width:'+(f.projectedExpenses?Math.min(100,f.actualExpenses/f.projectedExpenses*100):0)+'%"></span></div></div><div class="forecast-foot"><span>Модель: историческая месячная база с поправкой на долю расходов, обычно уже совершённую к текущему дню. База переводов: '+money(f.transferBaseline)+'/мес. (до текущего дня '+Math.round(f.transferShare*100)+'%); остальные расходы: '+money(f.otherBaseline)+'/мес. (до текущего дня '+Math.round(f.otherShare*100)+'%).</span><span>История: '+f.historyOperations.toLocaleString('ru-RU')+' операций за '+f.historyMonths+' месяцев. '+(f.incomingForecast.items.length?'Ожидаемые поступления: '+f.incomingForecast.items.map(x=>x.name+' — '+money(x.amount)+(x.kind==='marketplace_monthly'?' (оценка до конца месяца)':' ('+x.date.toLocaleDateString('ru-RU')+')')).join('; ')+'.':'Регулярные поступления не подтверждены историей.')+(f.incomingForecast.diagnostics?' Выплаты Совкомбанка в истории: около 10-го — '+f.incomingForecast.diagnostics.payroll10+' операций, около 25-го — '+f.incomingForecast.diagnostics.payroll25+'. Доход от бизнеса на Ozon: выплаты в '+f.incomingForecast.diagnostics.ozonPositiveMonths+' из последних '+f.incomingForecast.diagnostics.ozonObservedMonths+' месяцев; медиана '+money(f.incomingForecast.diagnostics.ozonMedian)+', уже получено '+money(f.incomingForecast.diagnostics.ozonCurrent)+'.':'')+'</span>'+(f.top.length?'<span>Основные будущие категории: '+f.top.map(x=>esc(x.name)+' · '+money(x.amount)).join(' · ')+'</span>':'')+(next.length?'<span class="forecast-upcoming">Ближайшие платежи: '+next.map(x=>esc(x.name)+' · '+x.date.toLocaleDateString('ru-RU',{day:'numeric',month:'short'})+' · '+money(x.amount)).join(' · ')+'</span>':'')+'</div>'}
 
 let forecastBacktestCache=null;
 function buildForecastBacktest(config={id:'current',transferLookback:6,transferShareLookback:3,otherLookback:12,otherShareLookback:6}){
