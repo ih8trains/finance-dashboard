@@ -514,34 +514,21 @@ function forecastIncoming(history,current,today,end){
  const rows=[];
  months.forEach(m=>{const ix=headers.map(h=>m.headers.indexOf(h));m.rows.forEach(row=>rows.push(ix.map(i=>i<0?'':row[i]??'')))});
  const n=normalize(headers,rows);
- rawHeaders=headers;rawRows=rows;ops=n.items;lastMeta=n;
- applyRules();
- return {items:ops,months:months.map(m=>m.month),meta:{inner:n.inner,invalid:n.invalid,other:n.other,innerCredit:n.innerCredit,innerDebit:n.innerDebit,innerCreditAmount:n.innerCreditAmount,innerDebitAmount:n.innerDebitAmount}};
-}async function ensureForecastHistory(pass){
- if(forecastHistoryReady||forecastHistoryLoading)return;
- forecastHistoryLoading=true;forecastHistoryError='';
- const loadButton=$('loadAllArchives');if(loadButton)loadButton.disabled=true;
- const archives=archiveManifest?.archives?.filter(x=>x&&x.status==='verified').sort((a,b)=>String(a.month).localeCompare(String(b.month)))||[];
- try{
-  for(let i=0;i<archives.length;i++){
-   const month=archives[i].month;
-   if(!loadedMonthPayloads.has(month))await loadArchiveData(pass,[month]);
-   const el=$('forecastConfidence');if(el)el.textContent='Загрузка истории '+(i+1)+'/'+archives.length;
-  }
-  const builtHistory=buildForecastHistory();
-  forecastHistoryOps=builtHistory.items;forecastHistoryMeta=builtHistory.meta;forecastHistoryReady=true;forecastBacktestCache=buildForecastBacktest();forecastCategoryBacktestCache=null;selectForecastExpenseModel();
-  $('dataStatus').textContent=ops.length.toLocaleString('ru-RU')+' операций · вся история: '+archives.length+' месяцев';
-  const btn=$('loadAllArchives');if(btn){btn.textContent='Вся история загружена';btn.disabled=false}
-  renderAll();
- }catch(e){
-  forecastHistoryError=e.message||'Не удалось загрузить исторические данные';
-  const el=$('forecastConfidence');if(el)el.textContent='История недоступна';
-  console.error('[Finance] Forecast history:',e);
- }finally{
-  forecastHistoryLoading=false;
-  if(!forecastHistoryReady)renderMonthForecast();
- }
-}function isForecastTransfer(o){return /^перевод/i.test(String(o.bankCategory||''))}
+ applyRules(n.items);
+ return {items:n.items,months:months.map(m=>m.month),meta:{inner:n.inner,invalid:n.invalid,other:n.other,innerCredit:n.innerCredit,innerDebit:n.innerDebit,innerCreditAmount:n.innerCreditAmount,innerDebitAmount:n.innerDebitAmount}};
+}
+function refreshForecastHistory(){
+ const builtHistory=buildForecastHistory();
+ forecastHistoryOps=builtHistory.items;forecastHistoryMeta=builtHistory.meta;
+ forecastHistoryReady=builtHistory.months.length>0;forecastHistoryError='';
+ forecastBacktestCache=forecastHistoryReady?buildForecastBacktest():null;
+ forecastCategoryBacktestCache=null;
+ if(forecastHistoryReady)selectForecastExpenseModel();
+ const el=$('forecastConfidence');
+ if(el)el.textContent=forecastHistoryReady?'История прогноза: '+builtHistory.months.length+' загруженных месяцев':'Загрузите период для расчёта прогноза';
+ return builtHistory;
+}
+function isForecastTransfer(o){return /^перевод/i.test(String(o.bankCategory||''))}
 function estimateOtherCategoryFuture(monthRows,priorKeys,day,fallbackShare){
  const baseKeys=priorKeys.slice(-12),shareKeys=priorKeys.slice(-6),categories=new Set();
  baseKeys.forEach(k=>(monthRows.get(k)||[]).forEach(o=>{if(!isForecastTransfer(o))categories.add(String(o.bankCategory||'Без категории'))}));
@@ -784,16 +771,25 @@ let rangeLoadToken=0;
 async function loadMoreForCurrentRange(){
  const token=++rangeLoadToken,bounds=rangeBounds(),wanted=monthsForRange(bounds.from,bounds.to),missing=wanted.filter(m=>!loadedMonthPayloads.has(m));
  if(missing.length){ops=[];rawRows=[];rawHeaders=[];renderAll();$('rangeLoadingText').textContent='Загружаю '+missing.length+' '+(missing.length===1?'месяц':'месяцев')+' выбранного периода…';$('rangeLoading').classList.remove('hidden');$('dataStatus').textContent='Загрузка архивов выбранного периода…'}
- try{const data=await loadArchiveData(password,missing);if(token!==rangeLoadToken)return false;rawHeaders=data.headers;rawRows=data.rows;const n=normalize(rawHeaders,rawRows);ops=n.items;lastMeta=n;applyRules();$('dataStatus').textContent=ops.length.toLocaleString('ru-RU')+' операций · '+loadedMonthPayloads.size+'/'+data.availableMonths.length+' месяцев загружено';return true}
+ try{const data=await loadArchiveData(password,missing);if(token!==rangeLoadToken)return false;rawHeaders=data.headers;rawRows=data.rows;const n=normalize(rawHeaders,rawRows);ops=n.items;lastMeta=n;applyRules();refreshForecastHistory();$('dataStatus').textContent=ops.length.toLocaleString('ru-RU')+' операций · '+loadedMonthPayloads.size+'/'+data.availableMonths.length+' месяцев загружено';return true}
  finally{if(token===rangeLoadToken)$('rangeLoading').classList.add('hidden')}
 }
 async function loadAllArchives(){
- await ensureForecastHistory(password);
- if(forecastHistoryReady){
-  const btn=$('loadAllArchives');if(btn){btn.textContent='Вся история загружена';btn.disabled=false}
-  $('dataStatus').textContent=ops.length.toLocaleString('ru-RU')+' операций · вся история загружена';
- }
-}async function loadUserData(pass){
+ const btn=$('loadAllArchives');if(btn)btn.disabled=true;
+ try{
+  const archives=archiveManifest?.archives?.filter(x=>x&&x.status==='verified').sort((a,b)=>String(a.month).localeCompare(String(b.month)))||[];
+  for(let i=0;i<archives.length;i++){
+   const month=archives[i].month;
+   if(!loadedMonthPayloads.has(month))await loadArchiveData(password,[month]);
+   if(btn)btn.textContent='Загрузка '+(i+1)+'/'+archives.length;
+  }
+  refreshForecastHistory();
+  if(btn){btn.textContent='Вся история загружена';btn.disabled=false}
+  $('dataStatus').textContent=ops.length.toLocaleString('ru-RU')+' операций · '+loadedMonthPayloads.size+'/'+archives.length+' месяцев загружено';
+  if(activePage==='forecast')renderMonthForecast();
+ }catch(e){if(btn){btn.disabled=false;btn.textContent='Загрузить всю историю'}throw e}
+}
+async function loadUserData(pass){
  const url='https://raw.githubusercontent.com/ih8trains/finance-dashboard/main/'+USER_DATA_PATH+'?t='+Date.now();
  const response=await fetch(url,{cache:'no-store'});
  if(response.status===404)return {labels:{},settings:{},rules:[]};
@@ -859,7 +855,7 @@ async function loadDashboard(pass){
  $('dataStatus').textContent=`${ops.length.toLocaleString('ru-RU')} операций · ${data.months}/${data.availableMonths.length} месяцев загружено`;const allBtn=$('loadAllArchives');if(allBtn)allBtn.textContent=data.months===data.availableMonths.length?'Вся история загружена':'Загрузить всю историю';
  $('calendarMonth').value=new Date().toISOString().slice(0,7);
  const renderStart=performance.now();renderAll();updatePendingStatus();timings.render=Math.round(performance.now()-renderStart);
- timings.total=Math.round(performance.now()-totalStart);console.info('[Finance] Время загрузки, мс',timings);setTimeout(()=>ensureForecastHistory(pass),0);
+ timings.total=Math.round(performance.now()-totalStart);console.info('[Finance] Время загрузки, мс',timings);refreshForecastHistory();
 }
 
 const ARCHIVE_PBKDF2_ITERATIONS = 600000;
