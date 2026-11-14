@@ -534,7 +534,7 @@ function forecastIncoming(history,current,today,end){
  const currentMikhail=current.filter(o=>o.type==='income'&&o.isMikhailVtbCredit).reduce((sum,o)=>sum+o.amount,0);
  const remaining=Math.max(0,expectedMonthly-currentMikhail);
  if(monthlySamples.length>=2&&remaining>0)items.push({name:'Доход от бизнеса на Ozon',date:end,amount:remaining,kind:'marketplace_monthly'});
- const recurringOtherCandidate=recurringOtherIncomeForecast(history,priorKeys,current),recurringOtherSelected=!!forecastOtherIncomeModelStats?.selected,recurringOther=recurringOtherSelected?recurringOtherCandidate:{items:[],amount:0};
+ const recurringOtherCandidate=recurringOtherIncomeForecast(history,priorKeys,current),otherRecurringSelected=!!(typeof forecastOtherIncomeModelStats!=='undefined'&&forecastOtherIncomeModelStats&&forecastOtherIncomeModelStats.selected),recurringOther=otherRecurringSelected?recurringOtherCandidate:{items:[],amount:0};
  recurringOther.items.forEach(x=>items.push({name:'Повторяющееся поступление · '+x.name,date:end,amount:x.amount,kind:'recurring_income'}));
  return {amount:items.reduce((sum,x)=>sum+x.amount,0),items,diagnostics:{payroll10:payroll.filter(o=>Math.abs(o.date.getDate()-10)<=4&&monthKey(o.date)!==currentKey).length,payroll25:payroll.filter(o=>Math.abs(o.date.getDate()-25)<=4&&monthKey(o.date)!==currentKey).length,ozonPositiveMonths:monthlySamples.length,ozonObservedMonths:recentKeys.length,ozonMedian:expectedMonthly,ozonCurrent:currentMikhail,otherRecurringSources:recurringOther.items.length,otherRecurringAmount:recurringOther.amount,otherRecurringCandidates:recurringOtherCandidate.items.length,otherRecurringSelected}};
 }function buildForecastHistory(){
