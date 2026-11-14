@@ -643,18 +643,90 @@ function forecastMetricSummary(rows){
 }
 function buildDailyShareBacktest(){
  if(!forecastHistoryReady||!forecastHistoryOps)return [];
- const monthKeys=[...loadedMonthPayloads.keys()].sort(),history=forecastHistoryOps,recurring=(settings.recurringPayments||[]).filter(x=>x.enabled!==false),isRec=o=>recurring.some(x=>recurringMatch(o,x)),key=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
- const totals=new Map(monthKeys.map(k=>[k,{income:0,expense:0,incomeByDay:Array(32).fill(0),expenseByDay:Array(32).fill(0)}]));
- history.forEach(o=>{const k=key(o.date),m=totals.get(k);if(!m)return;const day=o.date.getDate();if(o.type==='income'){m.income+=o.amount;m.incomeByDay[day]+=o.amount}else if(o.type==='expense'&&scopeOf(o)==='personal'&&!isRec(o)){m.expense+=o.amount;m.expenseByDay[day]+=o.amount}});
- totals.forEach(m=>{for(const type of ['income','expense']){const arr=m[type+'ByDay'];for(let d=1;d<32;d++)arr[d]+=arr[d-1]}});
- const configs=[6,12,24].flatMap(window=>[{window,weight:'equal',label:window+' мес. · среднее'},{window,weight:'recent',label:window+' мес. · взвешенное'}]),results=[];
- configs.forEach(cfg=>{for(const type of ['income','expense']){const rows=[];let eligibleTargets=0,zeroTargetMonths=0;
-  monthKeys.filter(k=>k<key(new Date())).forEach(target=>{const [ty,tm]=target.split('-').map(Number),prior=Array.from({length:cfg.window},(_,i)=>key(new Date(ty,tm-1-(cfg.window-i),1)));if(!prior.every(k=>totals.has(k)))return;const targetData=totals.get(target);if(!targetData)return;eligibleTargets++;if(targetData[type]<=0){zeroTargetMonths++;return}const days=new Date(ty,tm,0).getDate();
-   [5,10,15,20,25].forEach(day=>{if(day>=days)return;const samples=prior.map((k,i)=>{const data=totals.get(k),total=data?.[type]||0;if(total<=0)return null;const monthDays=new Date(Number(k.slice(0,4)),Number(k.slice(5,7)),0).getDate(),share=data[type+'ByDay'][Math.min(day,monthDays)]/total;return Number.isFinite(share)&&share>0?{share,weight:cfg.weight==='recent'?i+1:1}:null}).filter(Boolean);if(samples.length<Math.max(3,Math.ceil(cfg.window*.5)))return;const weightSum=samples.reduce((z,x)=>z+x.weight,0),share=samples.reduce((z,x)=>z+x.share*x.weight,0)/weightSum;if(!(share>.03&&share<=1.05))return;const actualToDate=targetData[type+'ByDay'][day],actual=targetData[type],predicted=actualToDate/share,error=predicted-actual;rows.push({month:target,day,actual,predicted,error,absPct:Math.abs(error)/Math.max(1,actual),share,actualToDate})});
+ const monthKeys=[...loadedMonthPayloads.keys()].sort();
+ const history=forecastHistoryOps;
+ const recurring=(settings.recurringPayments||[]).filter(x=>x.enabled!==false);
+ const isRec=o=>recurring.some(x=>recurringMatch(o,x));
+ const key=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+ const totals=new Map();
+ monthKeys.forEach(k=>totals.set(k,{income:0,expense:0,incomeByDay:Array(32).fill(0),expenseByDay:Array(32).fill(0)}));
+ history.forEach(o=>{
+  const k=key(o.date),m=totals.get(k);
+  if(!m)return;
+  const day=o.date.getDate();
+  if(o.type==='income'){m.income+=o.amount;m.incomeByDay[day]+=o.amount}
+  else if(o.type==='expense'&&scopeOf(o)==='personal'&&!isRec(o)){m.expense+=o.amount;m.expenseByDay[day]+=o.amount}
+ });
+ totals.forEach(m=>{
+  ['income','expense'].forEach(type=>{
+   const arr=m[type+'ByDay'];
+   for(let d=1;d<32;d++)arr[d]+=arr[d-1];
   });
-  const absolute=rows.reduce((z,x)=>z+Math.abs(x.error),0),actual=rows.reduce((z,x)=>z+x.actual,0);results.push({type,label:cfg.label,window:cfg.window,weight:cfg.weight,rows,n:rows.length,mae:rows.length?absolute/rows.length:0,wape:actual?absolute/actual:0,mape:rows.length?rows.reduce((z,x)=>z+x.absPct,0)/rows.length:0,bias:rows.length?rows.reduce((z,x)=>z+x.error,0)/rows.length:0,eligibleTargets,zeroTargetMonths});
- }}
- ['income','expense'].forEach(type=>['equal','recent'].forEach(weight=>{const short=results.find(x=>x.type===type&&x.window===6&&x.weight===weight),long=results.find(x=>x.type===type&&x.window===12&&x.weight===weight);if(!short||!long)return;const longKeys=new Set(long.rows.map(x=>x.month+'|'+x.day)),commonShort=short.rows.filter(x=>longKeys.has(x.month+'|'+x.day)),shortKeys=new Set(short.rows.map(x=>x.month+'|'+x.day)),commonLong=long.rows.filter(x=>shortKeys.has(x.month+'|'+x.day));[[short,commonShort],[long,commonLong]].forEach(([item,subset])=>{const abs=subset.reduce((z,x)=>z+Math.abs(x.error),0),sum=subset.reduce((z,x)=>z+x.actual,0);item.commonN=subset.length;item.commonMae=subset.length?abs/subset.length:null;item.commonWape=sum?abs/sum:null})}));
+ });
+ const configs=[];
+ [6,12,24].forEach(window=>{
+  configs.push({window,weight:'equal',label:window+' мес. · среднее'});
+  configs.push({window,weight:'recent',label:window+' мес. · взвешенное'});
+ });
+ const results=[];
+ configs.forEach(cfg=>{
+  ['income','expense'].forEach(type=>{
+   const rows=[];
+   let eligibleTargets=0,zeroTargetMonths=0;
+   monthKeys.filter(k=>k<key(new Date())).forEach(target=>{
+    const parts=target.split('-').map(Number),ty=parts[0],tm=parts[1];
+    const prior=[];
+    for(let i=0;i<cfg.window;i++)prior.push(key(new Date(ty,tm-1-(cfg.window-i),1)));
+    if(!prior.every(k=>totals.has(k)))return;
+    const targetData=totals.get(target);
+    if(!targetData)return;
+    eligibleTargets++;
+    if(targetData[type]<=0){zeroTargetMonths++;return}
+    const days=new Date(ty,tm,0).getDate();
+    [5,10,15,20,25].forEach(day=>{
+     if(day>=days)return;
+     const samples=[];
+     prior.forEach((k,i)=>{
+      const data=totals.get(k),total=data[type]||0;
+      if(total<=0)return;
+      const p=k.split('-').map(Number);
+      const monthDays=new Date(p[0],p[1],0).getDate();
+      const share=data[type+'ByDay'][Math.min(day,monthDays)]/total;
+      if(Number.isFinite(share)&&share>0)samples.push({share,weight:cfg.weight==='recent'?i+1:1});
+     });
+     if(samples.length<Math.max(3,Math.ceil(cfg.window*.5)))return;
+     const weightSum=samples.reduce((z,x)=>z+x.weight,0);
+     const share=samples.reduce((z,x)=>z+x.share*x.weight,0)/weightSum;
+     if(!(share>.03&&share<=1.05))return;
+     const actualToDate=targetData[type+'ByDay'][day],actual=targetData[type];
+     const predicted=actualToDate/share,error=predicted-actual;
+     rows.push({month:target,day,actual,predicted,error,absPct:Math.abs(error)/Math.max(1,actual),share,actualToDate});
+    });
+   });
+   const absolute=rows.reduce((z,x)=>z+Math.abs(x.error),0);
+   const actual=rows.reduce((z,x)=>z+x.actual,0);
+   results.push({type,label:cfg.label,window:cfg.window,weight:cfg.weight,rows,n:rows.length,mae:rows.length?absolute/rows.length:0,wape:actual?absolute/actual:0,mape:rows.length?rows.reduce((z,x)=>z+x.absPct,0)/rows.length:0,bias:rows.length?rows.reduce((z,x)=>z+x.error,0)/rows.length:0,eligibleTargets,zeroTargetMonths});
+  });
+ });
+ ['income','expense'].forEach(type=>{
+  ['equal','recent'].forEach(weight=>{
+   const short=results.find(x=>x.type===type&&x.window===6&&x.weight===weight);
+   const long=results.find(x=>x.type===type&&x.window===12&&x.weight===weight);
+   if(!short||!long)return;
+   const longKeys=new Set(long.rows.map(x=>x.month+'|'+x.day));
+   const commonShort=short.rows.filter(x=>longKeys.has(x.month+'|'+x.day));
+   const shortKeys=new Set(short.rows.map(x=>x.month+'|'+x.day));
+   const commonLong=long.rows.filter(x=>shortKeys.has(x.month+'|'+x.day));
+   [[short,commonShort],[long,commonLong]].forEach(pair=>{
+    const item=pair[0],subset=pair[1];
+    const abs=subset.reduce((z,x)=>z+Math.abs(x.error),0);
+    const sum=subset.reduce((z,x)=>z+x.actual,0);
+    item.commonN=subset.length;
+    item.commonMae=subset.length?abs/subset.length:null;
+    item.commonWape=sum?abs/sum:null;
+   });
+  });
+ });
  return results;
 }
 function buildForecastCategoryBacktest(){
