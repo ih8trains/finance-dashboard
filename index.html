@@ -521,22 +521,18 @@ async function prepareForecastHistory(){
  if(forecastHistoryLoading)return;
  forecastHistoryLoading=true;forecastHistoryError='';
  const status=$('forecastConfidence'),panel=$('monthForecast');
- if(status)status.textContent='Подготавливаю историю прогноза…';
- if(panel)panel.innerHTML='<div class="empty">Загружаю необходимые архивы для прогноза…</div>';
+ if(status)status.textContent='Использую уже загруженные архивы…';
+ if(panel)panel.innerHTML='<div class="empty">Собираю прогноз из уже загруженных данных…</div>';
  try{
+  // Wait for the dashboard's normal current-month / month / quarter / half-year warm-up.
+  // Forecast itself must not fetch any additional archive.
   if(warmupPromise)await warmupPromise;
-  const now=new Date(),currentStart=new Date(now.getFullYear(),now.getMonth(),1);
-  const historyStart=new Date(now.getFullYear(),now.getMonth()-12,1);
-  const historyEnd=new Date(now.getFullYear(),now.getMonth(),0,23,59,59,999);
-  const required=monthsForRange(historyStart,historyEnd);
-  const missing=required.filter(month=>!loadedMonthPayloads.has(month));
-  if(missing.length){
-   if(status)status.textContent='Для прогноза загружаю ещё '+missing.length+' архивов…';
-   await loadArchiveData(password,missing);
-  }
   const builtHistory=refreshForecastHistory();
-  const completedMonths=builtHistory.months.filter(k=>k<monthKey(currentStart)).length;
-  if(status)status.textContent='История прогноза: '+completedMonths+' завершённых месяцев';
+  const currentKey=new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0');
+  const completedMonths=builtHistory.months.filter(k=>k<currentKey).length;
+  if(status)status.textContent=completedMonths
+   ?'История прогноза: '+completedMonths+' завершённых месяцев'
+   :'Выбери «Месяц», «Квартал» или «Полгода», чтобы загрузить историю';
  }catch(e){
   forecastHistoryError=e.message||'Не удалось подготовить историю прогноза';
   if(status)status.textContent='Не удалось подготовить историю: '+forecastHistoryError;
