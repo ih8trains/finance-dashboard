@@ -495,7 +495,7 @@ function estimatePayrollPayment(history,targetDate,payday,beforeDate){
 }function recurringMatch(o,x){const n=String(x.match||'').trim().toLowerCase();return !!n&&String((o.merchant||'')+' '+(o.description||'')+' '+(o.source||'')).toLowerCase().includes(n)}
 function forecastIncomeSourceKey(o){
  if(o.type!=='income'||o.isSovcombankCredit||o.isMikhailVtbCredit||String(o.refund||'').trim())return '';
- const raw=String(o.senderDetails||o.source||o.description||'').trim().replace(/\\s+/g,' ');
+ const raw=String(o.senderDetails||o.source||o.description||'').trim().replace(/\s+/g,' ');
  if(!raw||/^(источник не указан|unknown|не указано)$/i.test(raw))return '';
  return raw.toLocaleLowerCase('ru-RU');
 }
