@@ -1027,3 +1027,11 @@
 - Пункты: overview, comparison, wrapped, income, expenses, budget, optimize, operations, merchants, subscriptions, calendar, analytics, tags, rules, settings. Прогноз не восстанавливался (в текущей навигации его нет).
 - Референс: пользовательский ZIP `dashboard_icons_hq.zip` (иллюстрации Gemini) и скриншот боковой панели. Встроенные SVG — лёгкие единообразные адаптации, не сами PNG-референсы.
 - JS проверен синтаксически (`new Function`); визуальное тестирование в браузере не проводилось.
+
+## Редизайн Golden Gate — 2026-11-14
+
+- Коммит `c3c1295b733625f3aeae72a510ac0762fdbea787`: существующий тяжёлый CSS для объёмных иконок заменён на плоские семантические цветные SVG-плитки, похожие на System Settings macOS 27 Golden Gate. Размер 28 px (25 px на узком экране), линии SVG ~18 px; единый набор 15 пунктов.
+- Цвета сдержанные, смысловые: зелёный доходы, коралловый расходы, голубой сравнение, фиолетовый Wrapped и цели, бирюзовый календарь, нейтральные серые настройки и операции. Лёгкий глянцевый верхний блик вместо сильного 3D-объёма.
+- Интерфейс: edge-to-edge sidebar без плавающей тени; мягкое выделение выбранного пункта, полупрозрачная шапка, менее тяжёлые карточки и панель выбора периода. Есть `prefers-reduced-motion` и `prefers-reduced-transparency` (если поддерживаются браузером).
+- Реализация только CSS в `index.html`, без новых сетевых зависимостей и без изменения JS, аутентификации, операций и архивов. Inline JS проверен через `new Function`; браузерный E2E и визуальная проверка реальной публикации ещё не выполнены.
+- Исследованные источники: Apple Human Interface Guidelines Sidebars (https://developer.apple.com/design/human-interface-guidelines/sidebars), Apple macOS 27 (https://www.apple.com/os/macos/), WWDC26 Platform State of the Union (https://developer.apple.com/videos/play/wwdc2026/102/). Важны читаемость, смысловой цвет, ровные sidebars и деликатная прозрачность.
