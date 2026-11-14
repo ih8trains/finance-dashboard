@@ -452,7 +452,7 @@ button:active,.btn:active,.primary:active{transform:translateY(1px) scale(.985)}
 <div class="grid cols-even"><article class="card"><div class="card-head"><div><h2>Финансовые сигналы</h2><div class="card-desc">Что требует внимания в выбранном периоде</div></div><button class="btn small" data-goto="optimize">Все рекомендации</button></div><div id="overviewSignals"></div></article><article class="card"><div class="card-head"><div><h2>Бюджет месяца</h2><div class="card-desc">План, факт и прогноз до конца месяца</div></div><button class="btn small" data-goto="budget">Настроить</button></div><div id="overviewBudget"></div></article></div>
 
 <div class="section-head"><h2>Последние операции</h2><button class="btn small" data-goto="operations">Открыть журнал</button></div><div class="card table-card"><div class="table-scroll"><table><thead><tr><th>Дата</th><th>Операция</th><th>Категория / теги</th><th>Контекст</th><th class="right">Сумма</th></tr></thead><tbody id="recentBody"></tbody></table></div></div></section>
-<section class="page" id="page-forecast"><article class="card forecast-panel"><div class="card-head"><div><h2>Прогноз до конца месяца</h2><div class="card-desc">Фактические результаты и ожидаемый итог на основе текущих данных</div></div><span class="pill" id="forecastConfidence">Подготовка истории</span></div><div id="monthForecast"></div><div id="forecastDiagnostics" style="margin-top:18px;padding-top:16px;border-top:1px solid #ffffff12"></div><div id="forecastBacktest" style="margin-top:18px;padding-top:16px;border-top:1px solid #ffffff12"></div></article></section>
+<section class="page" id="page-forecast"><article class="card forecast-panel"><div class="card-head"><div><h2>Прогноз до конца месяца</h2><div class="card-desc">Фактические результаты и ожидаемый итог на основе текущих данных</div></div><span class="pill" id="forecastConfidence">Подготовка истории</span></div><div id="monthForecast"></div><div id="forecastDiagnostics" style="margin-top:18px;padding-top:16px;border-top:1px solid #ffffff12"></div><div id="forecastBacktest" style="margin-top:18px;padding-top:16px;border-top:1px solid #ffffff12"></div><div style="margin-top:16px;padding-top:14px;border-top:1px solid #ffffff12;display:flex;align-items:center;gap:10px;flex-wrap:wrap"><button class="btn small" id="exportForecastData">Передать обезличенную историю для анализа</button><span id="forecastExportStatus" class="card-desc">Временно передаются только дневные суммы по группам. Без ID, описаний, магазинов, контрагентов и счетов. Файл будет в публичной временной ветке GitHub.</span></div></article></section>
 <section class="page" id="page-income"><div class="grid kpis" id="incomeKpis"></div><div class="grid cols-even"><article class="card"><div class="card-head"><div><h2>Источники доходов</h2><div class="card-desc">Кто и что приносит деньги</div></div></div><div class="chart"><canvas id="incomeSourceChart"></canvas></div></article><article class="card"><div class="card-head"><div><h2>Динамика поступлений</h2><div class="card-desc">По месяцам</div></div></div><div class="chart"><canvas id="incomeTrendChart"></canvas></div></article></div><div class="section-head"><h2>Поступления</h2></div><div class="card table-card"><div class="table-scroll"><table><thead><tr><th>Дата</th><th>Источник</th><th>Категория</th><th>Теги</th><th class="right">Сумма</th></tr></thead><tbody id="incomeBody"></tbody></table></div></div></section>
 <section class="page" id="page-expenses"><div class="grid kpis" id="expenseKpis"></div><div class="grid cols-even"><article class="card"><div class="card-head"><div><h2>Категории расходов</h2><div class="card-desc">Доля и сумма</div></div></div><div class="chart"><canvas id="expenseCategoryChart"></canvas></div></article><article class="card"><div class="card-head"><div><h2>Динамика личных расходов</h2><div class="card-desc">Помесячно</div></div></div><div class="chart"><canvas id="expenseTrendChart"></canvas></div></article></div><div class="section-head"><h2>Расходы</h2></div><div class="card table-card"><div class="table-scroll"><table><thead><tr><th>Дата</th><th>Магазин / описание</th><th>Категория</th><th>Контекст</th><th class="right">Сумма</th></tr></thead><tbody id="expenseBody"></tbody></table></div></div></section>
 <section class="page" id="page-budget"><div class="grid cols-2"><article class="card"><div class="card-head"><div><h2>Месячный бюджет</h2><div class="card-desc">Задай комфортный уровень расходов</div></div></div><div class="form-grid"><div class="form-item"><label>Общий лимит, ₽</label><input class="field" id="budgetTotal" type="number" min="0" placeholder="Например, 80000"></div><div class="form-item"><label>План доходов, ₽</label><input class="field" id="budgetIncome" type="number" min="0" placeholder="Например, 120000"></div><div class="form-item"><label>Цель накоплений, %</label><input class="field" id="savingTarget" type="number" min="0" max="100" placeholder="20"></div><div class="form-item"><label>Финансовая подушка, ₽</label><input class="field" id="emergencyTarget" type="number" min="0" placeholder="300000"></div></div><div style="margin-top:14px"><button class="primary" id="saveBudget">Сохранить бюджет</button></div></article><article class="card"><div class="card-head"><div><h2>План / факт</h2><div class="card-desc">Оценка по текущему темпу расходов</div></div></div><div id="budgetSummary"></div></article></div><div class="grid cols-even"><article class="card"><div class="card-head"><div><h2>Лимиты по категориям</h2><div class="card-desc">Ограничения на месяц</div></div></div><div class="toolbar"><select class="field" id="limitCategory"></select><input class="field" id="limitAmount" type="number" min="0" placeholder="Лимит, ₽"><button class="btn" id="addLimit">Добавить</button></div><div id="categoryLimits"></div></article><article class="card"><div class="card-head"><div><h2>Цели накоплений</h2><div class="card-desc">Отдельные финансовые цели</div></div></div><div class="toolbar"><input class="field" id="goalName" placeholder="Название цели"><input class="field" id="goalAmount" type="number" placeholder="Сумма, ₽"><button class="btn" id="addGoal">Добавить</button></div><div id="goalsList"></div></article></div></section>
@@ -894,4 +894,71 @@ $('saveRule').addEventListener('click',async()=>{let match=$('ruleMatch').value.
 $('recommendations').addEventListener('click',async e=>{let b=e.target.closest('[data-hide-rec],[data-dismiss-rec]');if(!b)return;let id=b.dataset.hideRec||b.dataset.dismissRec;settings.hiddenRecommendations=[...(settings.hiddenRecommendations||[]),id];await saveMeta({action:'save_settings',settings:{hiddenRecommendations:settings.hiddenRecommendations}});renderOptimize();renderOverview()});
 $('bulkTag').addEventListener('click',async()=>{if(!selected.size)return alert('Сначала выбери операции');let t=prompt('Тег для выбранных операций:');if(!t)return;let batch=[...selected].map(id=>{let l={...label({id}),operation_id:id};l.tags=[...new Set([...tagsOf({id}),t.trim()])];return l});batch.forEach(l=>{labels[l.operation_id]=l;pendingLabels[l.operation_id]={...l}});updatePendingStatus();selected.clear();renderAll();await flushPendingLabels()});$('bulkScope').addEventListener('click',async()=>{if(!selected.size)return alert('Сначала выбери операции');let s=prompt('Контекст: personal / transit / work / shared','transit');if(!['personal','transit','work','shared'].includes(s))return;let batch=[...selected].map(id=>({...label({id}),operation_id:id,spending_scope:s}));batch.forEach(l=>{labels[l.operation_id]=l;pendingLabels[l.operation_id]={...l}});updatePendingStatus();selected.clear();renderAll();await flushPendingLabels()});
 $('exportCsv').addEventListener('click',()=>{let rows=[['Дата','ID','Тип','Сумма','Описание','Магазин','Категория банка','Теги','Контекст','Человек','Проект','Комментарий']];visibleOps().forEach(o=>{let l=label(o);rows.push([fmtDate(o.date),o.id,o.type,o.amount,o.description,o.merchant,o.bankCategory,tagsOf(o).join('|'),scopeName(scopeOf(o)),l.related_person||'',l.project||'',l.comment||''])});let csv='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='finance-operations.csv';a.click();URL.revokeObjectURL(a.href)});
+
+async function exportForecastAnalysisData(){
+ const button=$('exportForecastData'),status=$('forecastExportStatus');
+ if(!button||!status)return;
+ if(!forecastHistoryReady||!Array.isArray(forecastHistoryOps)||!forecastHistoryOps.length){
+  status.textContent='Полная история ещё загружается. Дождись надписи «История 12+ месяцев» и повтори.';
+  return;
+ }
+ button.disabled=true;status.textContent='Формирую обезличенные дневные суммы…';
+ try{
+  const daily=new Map();
+  const monthKey=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+  const dateKey=d=>monthKey(d)+'-'+String(d.getDate()).padStart(2,'0');
+  const recurring=(settings.recurringPayments||[]).filter(x=>x.enabled!==false);
+  const isRecurring=o=>recurring.some(x=>recurringMatch(o,x));
+  const buckets=['expenseTransfer','expenseOther','incomeSalary','incomeOzon','incomeRefund','incomeTransfer','incomeOther'];
+  forecastHistoryOps.forEach(o=>{
+   let field='';
+   if(o.type==='expense'){
+    if(scopeOf(o)!=='personal'||isRecurring(o))return;
+    field=isForecastTransfer(o)?'expenseTransfer':'expenseOther';
+   }else if(o.type==='income'){
+    if(o.isSovcombankCredit)field='incomeSalary';
+    else if(o.isMikhailVtbCredit)field='incomeOzon';
+    else if(String(o.refund||'').trim())field='incomeRefund';
+    else if(/^перевод/i.test(String(o.bankCategory||'')))field='incomeTransfer';
+    else field='incomeOther';
+   }else return;
+   const key=dateKey(o.date);
+   if(!daily.has(key)){const row={date:key,operations:0};buckets.forEach(k=>{row[k]=0;row[k+'_count']=0});daily.set(key,row)}
+   const row=daily.get(key);row[field]+=Math.abs(Number(o.amount)||0);row[field+'_count']++;row.operations++;
+  });
+  const days=[...daily.values()].sort((a,b)=>a.date.localeCompare(b.date));
+  if(!days.length)throw new Error('После классификации не осталось операций для анализа.');
+  const totals={};buckets.forEach(k=>totals[k]=days.reduce((sum,x)=>sum+x[k],0));
+  const payload={
+   schemaVersion:1,
+   exportedAt:new Date().toISOString(),
+   currency:'RUB',
+   period:{from:days[0].date,to:days[days.length-1].date},
+   archiveMonths:[...loadedMonthPayloads.keys()].sort(),
+   normalizedOperations:forecastHistoryOps.length,
+   dailyRows:days.length,
+   totals,
+   rules:{internalTransfersExcludedByNormalization:true,recurringExpensesExcluded:true,expenseScope:'personal only'},
+   privacy:'Daily totals only. No transaction IDs, descriptions, merchants, counterparties, account identifiers, comments, tags, or raw rows.',
+   daily:days
+  };
+  status.textContent='Записываю '+days.length+' дневных строк во временную ветку GitHub…';
+  const token=getGitHubToken();
+  const branch='tmp-forecast-analysis-20261114';
+  const path='analysis/forecast-data.json';
+  const api='https://api.github.com/repos/ih8trains/finance-dashboard/contents/'+path;
+  const headers={Authorization:'Bearer '+token,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};
+  const check=await fetch(api+'?ref='+encodeURIComponent(branch),{headers,cache:'no-store'});
+  const body={message:'Temporary anonymized forecast analysis data',content:btoa(unescape(encodeURIComponent(JSON.stringify(payload)))),branch};
+  if(check.status===200){const current=await check.json();body.sha=current.sha}
+  else if(check.status!==404)throw new Error('GitHub не разрешил проверить временный файл. HTTP '+check.status);
+  const write=await fetch(api,{method:'PUT',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify(body),cache:'no-store'});
+  if(!write.ok){const error=await write.json().catch(()=>({}));throw new Error('Не удалось передать данные в GitHub. HTTP '+write.status+(error.message?': '+error.message:''))}
+  status.innerHTML='Готово: '+days.length+' дневных записей, '+forecastHistoryOps.length+' операций после нормализации. <a href="https://github.com/ih8trains/finance-dashboard/blob/'+branch+'/'+path+'" target="_blank" rel="noopener">Временный файл</a>';
+ }catch(error){
+  status.textContent='Ошибка передачи: '+(error?.message||String(error));
+ }finally{button.disabled=false}
+}
+
+$('exportForecastData').addEventListener('click',exportForecastAnalysisData);
 </script></body></html>
