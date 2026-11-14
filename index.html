@@ -488,59 +488,6 @@ function estimatePayrollPayment(history,targetDate,payday,beforeDate){
  if(points.length<3)return 0;
  return median(points.slice(-3).map(x=>x.value));
 }function recurringMatch(o,x){const n=String(x.match||'').trim().toLowerCase();return !!n&&String((o.merchant||'')+' '+(o.description||'')+' '+(o.source||'')).toLowerCase().includes(n)}
-function forecastIncomeSourceKey(o){
- if(o.type!=='income'||o.isSovcombankCredit||o.isMikhailVtbCredit||String(o.refund||'').trim())return '';
- const raw=String(o.senderDetails||o.source||o.description||'').trim().replace(/\s+/g,' ');
- if(!raw||/^(источник не указан|unknown|не указано)$/i.test(raw))return '';
- return raw.toLocaleLowerCase('ru-RU');
-}
-function recurringOtherIncomeForecast(history,priorKeys,currentRows=[]){
- const recentKeys=priorKeys.slice(-3),labelsByKey=new Map(),monthlyByKey=new Map();
- history.forEach(o=>{
-  const key=forecastIncomeSourceKey(o);
-  if(!key)return;
-  if(!labelsByKey.has(key))labelsByKey.set(key,String(o.senderDetails||o.source||o.description||'').trim());
-  if(!monthlyByKey.has(key))monthlyByKey.set(key,new Map());
-  const month=o.date.getFullYear()+'-'+String(o.date.getMonth()+1).padStart(2,'0'),byMonth=monthlyByKey.get(key);
-  byMonth.set(month,(byMonth.get(month)||0)+o.amount);
- });
- const currentByKey=new Map();
- currentRows.forEach(o=>{const key=forecastIncomeSourceKey(o);if(key)currentByKey.set(key,(currentByKey.get(key)||0)+o.amount)});
- const items=[];
- monthlyByKey.forEach((byMonth,key)=>{
-  const samples=recentKeys.map(month=>byMonth.get(month)||0),positive=samples.filter(v=>v>0);
-  if(positive.length<2)return;
-  const expected=median(positive),received=currentByKey.get(key)||0,amount=Math.max(0,expected-received);
-  if(amount>0)items.push({key,name:labelsByKey.get(key)||key,expected,received,amount,activeMonths:positive.length,observedMonths:recentKeys.length});
- });
- return {items,amount:items.reduce((sum,x)=>sum+x.amount,0)};
-}
-function forecastIncoming(history,current,today,end){
- const payroll=history.filter(o=>o.type==='income'&&o.isSovcombankCredit),mikhail=history.filter(o=>o.type==='income'&&o.isMikhailVtbCredit),items=[];
- const monthKey=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'),currentKey=monthKey(today);
- for(const day of [10,25]){
-  const target=new Date(today.getFullYear(),today.getMonth(),day,12),expected=estimatePayrollPayment(history,target,day,new Date(today.getFullYear(),today.getMonth(),1));
-  const already=current.some(o=>o.type==='income'&&o.isSovcombankCredit&&Math.abs(o.date.getDate()-day)<=4);
-  if(expected>0&&!already&&target>today&&target<=end)items.push({name:day===10?'Зарплата · Совкомбанк':'Аванс · Совкомбанк',date:target,amount:expected,kind:'payroll'});
- }
- const priorKeys=[...loadedMonthPayloads.keys()].filter(k=>k<currentKey).sort(),recentKeys=priorKeys.slice(-3);
- const monthlySamples=recentKeys.map(k=>mikhail.filter(o=>monthKey(o.date)===k).reduce((sum,o)=>sum+o.amount,0)).filter(v=>v>0);
- const expectedMonthly=monthlySamples.length>=2?median(monthlySamples):0;
- const currentMikhail=current.filter(o=>o.type==='income'&&o.isMikhailVtbCredit).reduce((sum,o)=>sum+o.amount,0);
- const remaining=Math.max(0,expectedMonthly-currentMikhail);
- if(monthlySamples.length>=2&&remaining>0)items.push({name:'Доход от бизнеса на Ozon',date:end,amount:remaining,kind:'marketplace_monthly'});
- const recurringOtherCandidate=recurringOtherIncomeForecast(history,priorKeys,current),otherRecurringSelected=!!(typeof forecastOtherIncomeModelStats!=='undefined'&&forecastOtherIncomeModelStats&&forecastOtherIncomeModelStats.selected),recurringOther=otherRecurringSelected?recurringOtherCandidate:{items:[],amount:0};
- recurringOther.items.forEach(x=>items.push({name:'Повторяющееся поступление · '+x.name,date:end,amount:x.amount,kind:'recurring_income'}));
- return {amount:items.reduce((sum,x)=>sum+x.amount,0),items,diagnostics:{payroll10:payroll.filter(o=>Math.abs(o.date.getDate()-10)<=4&&monthKey(o.date)!==currentKey).length,payroll25:payroll.filter(o=>Math.abs(o.date.getDate()-25)<=4&&monthKey(o.date)!==currentKey).length,ozonPositiveMonths:monthlySamples.length,ozonObservedMonths:recentKeys.length,ozonMedian:expectedMonthly,ozonCurrent:currentMikhail,otherRecurringSources:recurringOther.items.length,otherRecurringAmount:recurringOther.amount,otherRecurringCandidates:recurringOtherCandidate.items.length,otherRecurringSelected}};
-}function buildForecastHistory(){
- const months=[...loadedMonthPayloads.values()].sort((a,b)=>String(a.month).localeCompare(String(b.month))),headers=[];
- months.forEach(m=>m.headers.forEach(h=>{if(!headers.includes(h))headers.push(h)}));
- const rows=[];
- months.forEach(m=>{const ix=headers.map(h=>m.headers.indexOf(h));m.rows.forEach(row=>rows.push(ix.map(i=>i<0?'':row[i]??'')))});
- const n=normalize(headers,rows);
- applyRules(n.items);
- return {items:n.items,months:months.map(m=>m.month),meta:{inner:n.inner,invalid:n.invalid,other:n.other,innerCredit:n.innerCredit,innerDebit:n.innerDebit,innerCreditAmount:n.innerCreditAmount,innerDebitAmount:n.innerDebitAmount}};
-}
 async function prepareComparisonHistory(){
  const note=$('comparisonNote');if(note)note.textContent='Загружаю последние шесть завершённых месяцев…';
  try{if(warmupPromise)await warmupPromise;const ck=new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0'),available=(archiveManifest?.archives||[]).filter(x=>x&&x.status==='verified').map(x=>x.month).filter(k=>k<ck).sort(),need=available.slice(-6),missing=need.filter(k=>!loadedMonthPayloads.has(k));if(missing.length)await loadArchiveData(password,missing);renderComparisonCharts()}
