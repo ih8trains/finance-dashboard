@@ -593,7 +593,7 @@ function renderComparisonCharts(){
   const historical=h[k].slice(1),current=c[k].slice(1,day+1),values=[...historical,...current].filter(Number.isFinite);
   const largest=Math.max(0,...values),smallest=Math.min(0,...values);
   // Net is centered on zero; grow symmetrically only when actual values require it.
-  const netLimit=Math.max(50,Math.ceil(Math.max(Math.abs(largest),Math.abs(smallest))/25)*25);
+  const netLimit=Math.max(50,Math.ceil(Math.max(Math.abs(largest),Math.abs(smallest))/50)*50);
   const min=k==='net'?-netLimit:Math.min(0,Math.floor(smallest/25)*25);
   const max=k==='net'?netLimit:Math.max(100,Math.ceil(largest/25)*25);
   const ticks=Array.from({length:5},(_,i)=>min+(max-min)*i/4);
